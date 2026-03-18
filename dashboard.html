@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sattva | Pilot Dashboard</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        obsidian: '#0a100d',
+                        primary: '#d4af37',
+                        secondary: '#10b981',
+                        earth: '#8b5a2b',
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        display: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+        
+        body {
+            background-color: #0a100d;
+            color: #e5e7eb;
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            transition: all 0.4s ease;
+        }
+
+        .btn-glow {
+            position: relative;
+            z-index: 1;
+        }
+        .btn-glow::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 9999px;
+            background: linear-gradient(90deg, #d4af37, #10b981);
+            z-index: -1;
+            filter: blur(12px);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        .btn-glow:hover::before {
+            opacity: 0.4;
+        }
+
+        .banner-bg {
+            background: url('file:///C:/Users/Mayank/.gemini/antigravity/brain/e064d3e5-d370-486b-846b-2cfab8cf2101/ayurveda_hero_1773825937795.png') center/cover;
+            filter: grayscale(0.5) sepia(0.5);
+        }
+
+        /* Checkbox styling */
+        .ritual-checkbox:checked + div {
+            background-color: #10b981;
+            border-color: #10b981;
+        }
+        .ritual-checkbox:checked + div svg {
+            display: block;
+        }
+    </style>
+</head>
+<body class="antialiased flex h-screen overflow-hidden selection:bg-primary selection:text-obsidian">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-64 border-r border-white/5 bg-obsidian/90 backdrop-blur-3xl h-full flex flex-col pt-8 pb-6 px-6 relative z-20">
+        <div class="font-display italic font-bold text-3xl tracking-widest text-primary mb-12">
+            SATTVA
+        </div>
+        
+        <nav class="flex-1 space-y-4 font-sans font-light tracking-[0.2em] text-xs uppercase">
+            <a href="#" class="flex items-center space-x-4 text-primary bg-primary/10 px-4 py-3 rounded-xl border border-primary/20 transition-all">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                <span>Overview</span>
+            </a>
+            <a href="antigravity_motors.html" class="flex items-center space-x-4 text-gray-400 hover:text-white px-4 py-3 rounded-xl transition-all">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /></svg>
+                <span>Main Site</span>
+            </a>
+            <a href="#" class="flex items-center space-x-4 text-gray-400 hover:text-white px-4 py-3 rounded-xl transition-all">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+                <span>Rituals</span>
+            </a>
+            <a href="#" class="flex items-center space-x-4 text-gray-400 hover:text-white px-4 py-3 rounded-xl transition-all">
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                <span>Consultations</span>
+            </a>
+        </nav>
+        
+        <div class="mt-auto flex items-center gap-4 pt-6 border-t border-white/5">
+            <div class="w-10 h-10 rounded-full bg-primary/20 border border-primary/50 flex items-center justify-center font-display italic text-primary">EK</div>
+            <div>
+                <p class="font-sans text-xs tracking-widest uppercase text-white">Explorer</p>
+                <p class="text-gray-500 font-sans text-xs">Ayurvedic Journey</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-y-auto h-full relative gs-reveal-container">
+        <!-- Floating gradient background element -->
+        <div class="absolute top-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-primary/5 rounded-full blur-[120px] pointer-events-none z-0"></div>
+
+        <div class="p-10 md:p-16 max-w-6xl mx-auto relative z-10 space-y-10 gs-stagger">
+            
+            <!-- Welcome Banner -->
+            <div class="w-full h-64 rounded-3xl relative overflow-hidden flex items-end p-8 border border-white/10 shadow-2xl">
+                <div class="absolute inset-0 banner-bg opacity-30"></div>
+                <div class="absolute inset-0 bg-gradient-to-t from-obsidian via-obsidian/60 to-transparent"></div>
+                <div class="relative z-10">
+                    <p class="text-primary font-sans text-xs tracking-[0.4em] uppercase mb-2">Welcome Back</p>
+                    <h1 class="font-display italic text-5xl text-white">Your Path to Balance</h1>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- Left Column (Dosha Profile & Rituals) -->
+                <div class="lg:col-span-2 space-y-8">
+                    
+                    <!-- Dosha Assessment Result -->
+                    <div class="glass-panel p-8 rounded-3xl border-t border-secondary/30 relative overflow-hidden group">
+                        <div class="absolute right-[-40px] top-[-40px] w-64 h-64 opacity-10 mix-blend-screen transition-transform duration-700 group-hover:rotate-12 group-hover:scale-110 pointer-events-none">
+                            <img src="file:///C:/Users/Mayank/.gemini/antigravity/brain/e064d3e5-d370-486b-846b-2cfab8cf2101/ayurveda_doshas_1773826048767.png" class="w-full h-full object-cover rounded-full" style="filter: hue-rotate(90deg) saturate(1.2);">
+                        </div>
+                        <div class="relative z-10">
+                            <div class="flex items-center justify-between mb-8 border-b border-white/5 pb-4">
+                                <h2 class="font-sans text-xs tracking-[0.3em] uppercase text-gray-400">Current Constitution (Prakriti)</h2>
+                                <span class="bg-secondary/20 text-secondary border border-secondary/50 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest">Balanced</span>
+                            </div>
+                            
+                            <h3 class="font-display italic text-4xl text-white mb-2">Predominantly Kapha</h3>
+                            <p class="text-gray-400 font-light font-sans text-sm mb-6 max-w-sm">
+                                Your grounded, stable energy is currently your dominant force. Focus on incorporating light, warming routines to counter stagnation.
+                            </p>
+                            
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="bg-obsidian/50 p-4 rounded-xl border border-white/5">
+                                    <p class="text-xs text-gray-500 font-sans tracking-widest uppercase mb-1">Focus Element</p>
+                                    <p class="font-display text-lg text-white">Fire (Agni)</p>
+                                </div>
+                                <div class="bg-obsidian/50 p-4 rounded-xl border border-white/5">
+                                    <p class="text-xs text-gray-500 font-sans tracking-widest uppercase mb-1">Recommended Taste</p>
+                                    <p class="font-display text-lg text-white">Pungent, Bitter</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Daily Rituals Checklist -->
+                    <div class="glass-panel p-8 rounded-3xl">
+                        <div class="flex items-center justify-between mb-8">
+                            <h2 class="font-sans text-xs tracking-[0.3em] uppercase text-gray-400">Today's Dinacharya (Rituals)</h2>
+                            <p class="font-display italic text-primary">3 / 5 Completed</p>
+                        </div>
+                        
+                        <div class="space-y-4 font-sans font-light">
+                            <!-- Task 1 -->
+                            <label class="flex items-center p-4 bg-obsidian/40 rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-colors">
+                                <input type="checkbox" class="ritual-checkbox sr-only" checked>
+                                <div class="w-6 h-6 rounded border border-white/20 flex items-center justify-center mr-4 transition-colors">
+                                    <svg class="w-4 h-4 text-obsidian hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                </div>
+                                <span class="text-gray-300 text-sm">Tongue Scraping & Warm Water</span>
+                            </label>
+                            
+                            <!-- Task 2 -->
+                            <label class="flex items-center p-4 bg-obsidian/40 rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-colors">
+                                <input type="checkbox" class="ritual-checkbox sr-only" checked>
+                                <div class="w-6 h-6 rounded border border-white/20 flex items-center justify-center mr-4 transition-colors">
+                                    <svg class="w-4 h-4 text-obsidian hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                </div>
+                                <span class="text-gray-300 text-sm">Abhyanga (Self-Oil Massage)</span>
+                            </label>
+
+                            <!-- Task 3 -->
+                            <label class="flex items-center p-4 bg-obsidian/40 rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-colors">
+                                <input type="checkbox" class="ritual-checkbox sr-only" checked>
+                                <div class="w-6 h-6 rounded border border-white/20 flex items-center justify-center mr-4 transition-colors">
+                                    <svg class="w-4 h-4 text-obsidian hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                </div>
+                                <span class="text-gray-300 text-sm">20 Min Active Yoga Flow</span>
+                            </label>
+
+                            <!-- Task 4 -->
+                            <label class="flex items-center p-4 bg-obsidian/40 rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-colors">
+                                <input type="checkbox" class="ritual-checkbox sr-only">
+                                <div class="w-6 h-6 rounded border border-white/20 flex items-center justify-center mr-4 transition-colors">
+                                    <svg class="w-4 h-4 text-obsidian hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                </div>
+                                <span class="text-gray-300 text-sm">Ginger Tea Before Lunch</span>
+                            </label>
+
+                            <!-- Task 5 -->
+                            <label class="flex items-center p-4 bg-obsidian/40 rounded-xl border border-white/5 cursor-pointer hover:bg-white/5 transition-colors">
+                                <input type="checkbox" class="ritual-checkbox sr-only">
+                                <div class="w-6 h-6 rounded border border-white/20 flex items-center justify-center mr-4 transition-colors">
+                                    <svg class="w-4 h-4 text-obsidian hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                                </div>
+                                <span class="text-gray-300 text-sm">Evening Meditation (10 Mins)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Column (Upcoming & Herbs) -->
+                <div class="space-y-8">
+                    
+                    <!-- Consultation Panel -->
+                    <div class="glass-panel p-8 rounded-3xl border-t border-primary/30">
+                        <div class="w-12 h-12 bg-primary/10 rounded-full border border-primary/30 flex items-center justify-center mb-6 text-primary">
+                            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2v12a2 2 0 002 2z" /></svg>
+                        </div>
+                        <h2 class="font-display italic text-2xl text-white mb-2">Next Consultation</h2>
+                        <p class="text-gray-400 font-sans text-sm mb-6 pb-6 border-b border-white/10">Follow-up with Vaidya Sharma to track digestive improvements.</p>
+                        
+                        <div class="pt-2">
+                            <p class="text-xs text-gray-500 font-sans tracking-widest uppercase mb-1">Date & Time</p>
+                            <p class="font-display text-lg text-white mb-6">Oct 24, 10:00 AM</p>
+                            <button class="w-full btn-glow border border-primary/50 text-primary py-3 rounded-full font-sans uppercase tracking-[0.2em] text-xs hover:bg-primary hover:text-obsidian transition-colors">Reschedule</button>
+                        </div>
+                    </div>
+
+                    <!-- Recommended Herbs -->
+                    <div class="glass-panel p-8 rounded-3xl">
+                        <h2 class="font-sans text-xs tracking-[0.3em] uppercase text-gray-400 mb-6">Herbal Protocol</h2>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-4 bg-obsidian/50 p-3 rounded-xl">
+                                <div class="w-12 h-12 rounded-lg bg-red-900/30 overflow-hidden flex-shrink-0">
+                                    <img src="file:///C:/Users/Mayank/.gemini/antigravity/brain/e064d3e5-d370-486b-846b-2cfab8cf2101/ayurveda_history_1773826030460.png" class="w-full h-full object-cover opacity-60 mix-blend-screen sepia">
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-white font-sans">Ashwagandha</p>
+                                    <p class="text-xs text-gray-400 font-light">Grounding / Stress relief</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-4 bg-obsidian/50 p-3 rounded-xl">
+                                <div class="w-12 h-12 rounded-lg bg-yellow-600/30 overflow-hidden flex-shrink-0">
+                                    <img src="file:///C:/Users/Mayank/.gemini/antigravity/brain/e064d3e5-d370-486b-846b-2cfab8cf2101/ayurveda_hero_1773825937795.png" class="w-full h-full object-cover opacity-60 mix-blend-screen hue-rotate-60">
+                                </div>
+                                <div>
+                                    <p class="text-sm font-bold text-white font-sans">Triphala</p>
+                                    <p class="text-xs text-gray-400 font-light">Digestive reset</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            
+        </div>
+    </main>
+
+    <script>
+        // GSAP Animations
+        gsap.from(".font-display.text-3xl", { y: -20, opacity: 0, duration: 1, delay: 0.2 });
+        gsap.from("aside nav a", { x: -20, opacity: 0, duration: 0.8, stagger: 0.1, delay: 0.4 });
+        
+        // Stagger load main content
+        gsap.from(".gs-stagger > div", {
+            y: 40,
+            opacity: 0,
+            duration: 1,
+            stagger: 0.15,
+            ease: "power3.out",
+            delay: 0.2
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Essence of Ayurveda</title>
+    <style>
+        :root {
+            --primary-color: #2e5c46;
+            --secondary-color: #f7ede2;
+            --accent-color: #d68c45;
+            --text-dark: #333333;
+            --text-light: #ffffff;
+            --bg-gradient: linear-gradient(135deg, #f7ede2 0%, #e0e5df 100%);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background: var(--bg-gradient);
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Typography */
+        h1, h2, h3 {
+            font-family: 'Playfair Display', serif;
+            color: var(--primary-color);
+        }
+
+        h1 { font-size: 4rem; margin-bottom: 20px; }
+        h2 { font-size: 2.5rem; margin-bottom: 20px; }
+        p { font-size: 1.1rem; margin-bottom: 20px; }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        }
+
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Hero Section */
+        .hero {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background-color: var(--primary-color);
+            color: var(--text-light);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url('file:///C:/Users/Mayank/.gemini/antigravity/brain/e064d3e5-d370-486b-846b-2cfab8cf2101/ayurveda_hero_1773825937795.png') center/cover;
+            opacity: 0.4;
+            z-index: 0;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            padding: 20px;
+            animation: fadeIn 1.5s ease-out forwards;
+        }
+
+        .hero h1 {
+            color: var(--secondary-color);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            margin-top: 20px;
+            background: var(--accent-color);
+            color: var(--text-light);
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn:hover {
+            background: #b87538;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Content Sections */
+        .section {
+            padding: 100px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Two Column Layout */
+        .two-column {
+            display: flex;
+            align-items: center;
+            gap: 50px;
+            flex-wrap: wrap;
+        }
+
+        .two-column.reverse {
+            flex-direction: row-reverse;
+        }
+
+        .col-text {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .col-image {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .col-image img {
+            width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            transition: transform 0.5s ease;
+        }
+
+        .col-image:hover img {
+            transform: scale(1.02);
+        }
+
+        /* Glassmorphism Cards */
+        .cards-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            padding: 40px 30px;
+            border-radius: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            background: rgba(255, 255, 255, 0.6);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        }
+
+        .card h3 {
+            color: var(--accent-color);
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+        }
+
+        /* Footer */
+        footer {
+            background: var(--primary-color);
+            color: var(--secondary-color);
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 3rem; }
+            .section { padding: 60px 20px; }
+            .two-column { gap: 30px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hero Section -->
+    <header class="hero">
+        <div class="hero-content">
+            <h1>The Science of Life</h1>
+            <p style="font-size: 1.5rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.2);">Discover the ancient wisdom of Ayurveda for perfect balance of mind, body, and spirit.</p>
+            <a href="#history" class="btn">Explore the Journey</a>
+        </div>
+    </header>
+
+    <!-- History Section -->
+    <section id="history" class="section">
+        <div class="two-column animate-on-scroll">
+            <div class="col-text">
+                <h2>A 5,000-Year Legacy</h2>
+                <p>Originating in India over 5,000 years ago, Ayurveda is often called the "Mother of All Healing." It is derived from the Sanskrit words <i>Ayur</i> (life) and <i>Veda</i> (science or knowledge).</p>
+                <p>Ayurvedic teachings were originally transmitted orally from accomplished masters to their disciples. Eventually, this rich knowledge was transcribed into the ancient texts known as the Vedas, specifically the Atharvaveda, forming the foundational texts of this profound holistic healing system.</p>
+            </div>
+            <div class="col-image">
+                <img src="file:///C:/Users/Mayank/.gemini/antigravity/brain/e064d3e5-d370-486b-846b-2cfab8cf2101/ayurveda_history_1773826030460.png" alt="Ancient Ayurvedic Texts and Herbs">
+            </div>
+        </div>
+    </section>
+
+    <!-- Core Principles Section -->
+    <section class="section" style="background: rgba(255,255,255,0.3);">
+        <div class="two-column reverse animate-on-scroll">
+            <div class="col-text">
+                <h2>The Three Doshas</h2>
+                <p>According to Ayurveda, everything in the universe is composed of five elements: Space, Air, Fire, Water, and Earth. These elements combine in the human body to form three life forces or energies, known as Doshas. They control how your body works.</p>
+                <p>Understanding your unique Dosha profile is the key to maintaining health and targeting treatments to root causes rather than mere symptoms.</p>
+            </div>
+            <div class="col-image">
+                <img src="file:///C:/Users/Mayank/.gemini/antigravity/brain/e064d3e5-d370-486b-846b-2cfab8cf2101/ayurveda_doshas_1773826048767.png" alt="The Three Doshas">
+            </div>
+        </div>
+
+        <div class="cards-container animate-on-scroll">
+            <div class="card">
+                <h3>Vata</h3>
+                <p><strong>Space & Air</strong></p>
+                <p>Controls basic bodily functions, mind, breathing, blood flow, and heart function. When in balance, promotes creativity and flexibility.</p>
+            </div>
+            <div class="card">
+                <h3>Pitta</h3>
+                <p><strong>Fire & Water</strong></p>
+                <p>Controls digestion, metabolism, and certain hormones linked to appetite. Balanced Pitta leads to understanding and intelligence.</p>
+            </div>
+            <div class="card">
+                <h3>Kapha</h3>
+                <p><strong>Earth & Water</strong></p>
+                <p>Controls muscle growth, body strength, stability, weight, and immune system. Promotes love, calmness, and forgiveness when balanced.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Practices Section -->
+    <section class="section">
+        <div class="animate-on-scroll" style="text-align: center; max-width: 800px; margin: 0 auto;">
+            <h2>Daily Ayurvedic Practices</h2>
+            <p>Integrating Ayurveda into your daily life doesn't require sweeping changes. Small, consistent rituals can deeply profoundly impact your well-being.</p>
+        </div>
+        <div class="cards-container animate-on-scroll" style="margin-top: 40px;">
+            <div class="card" style="padding: 20px;">
+                <h4 style="color: var(--primary-color); font-size: 1.3rem;">Mindful Eating</h4>
+                <p style="font-size: 0.95rem;">Eat according to your Dosha, focusing on fresh, seasonal foods. Digestion (Agni) is the cornerstone of health.</p>
+            </div>
+            <div class="card" style="padding: 20px;">
+                <h4 style="color: var(--primary-color); font-size: 1.3rem;">Dinacharya (Routine)</h4>
+                <p style="font-size: 0.95rem;">Wake up early, scrape your tongue, practice oil pulling, and align your body clock with nature's rhythms.</p>
+            </div>
+            <div class="card" style="padding: 20px;">
+                <h4 style="color: var(--primary-color); font-size: 1.3rem;">Yoga & Meditation</h4>
+                <p style="font-size: 0.95rem;">Move your body gently and still your mind daily to maintain the flow of Prana (life energy) and reduce stress.</p>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <h2>Ayurveda Center</h2>
+        <p>&copy; 2026 The Science of Life. All rights reserved.</p>
+    </footer>
+
+    <script>
+        // Scroll Reveal Animation
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.2
+        };
+
+        const observer = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.animate-on-scroll').forEach(element => {
+            observer.observe(element);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANTIGRAVITY | Weightless. Peerless. Future.</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- GSAP for Animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <!-- Taildwind configuration -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'deep-space': '#050505',
+                        'midnight': '#0a0f1c',
+                        'electric-cyan': '#00f0ff',
+                        'plasma-purple': '#bf00ff'
+                    },
+                    backgroundImage: {
+                        'space-gradient': 'radial-gradient(circle at 50% -20%, #151a2d 0%, #050505 60%)',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Space Grotesk', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Space+Grotesk:wght@500;700&display=swap');
+        
+        body {
+            background-color: #050505;
+            color: white;
+            overflow-x: hidden;
+            cursor: none; /* Hide default cursor */
+        }
+
+        /* Magnetic Custom Cursor */
+        #custom-cursor {
+            width: 24px;
+            height: 24px;
+            border: 2px solid #00f0ff;
+            border-radius: 50%;
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.3s ease, height 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
+            mix-blend-mode: exclusion;
+        }
+
+        #custom-cursor.hovering {
+            width: 60px;
+            height: 60px;
+            background-color: rgba(191, 0, 255, 0.2);
+            border-color: #bf00ff;
+            backdrop-filter: blur(2px);
+        }
+
+        /* Glassmorphism Classes */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        }
+
+        /* Floating Animation */
+        .float {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-30px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* CTA Pulsing Glow */
+        .glow-pulse {
+            position: relative;
+            z-index: 1;
+        }
+
+        .glow-pulse::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border-radius: 9999px;
+            background: linear-gradient(90deg, #00f0ff, #bf00ff);
+            z-index: -1;
+            filter: blur(15px);
+            opacity: 0.6;
+            animation: pulse-glow 2s infinite alternate;
+        }
+
+        @keyframes pulse-glow {
+            0% { filter: blur(10px); opacity: 0.5; transform: scale(1); }
+            100% { filter: blur(25px); opacity: 0.9; transform: scale(1.05); }
+        }
+
+        /* Hide scrollbar for smooth feel */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050505;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2937;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #374151;
+        }
+    </style>
+</head>
+<body class="bg-space-gradient min-h-screen text-gray-200 antialiased">
+
+    <!-- Custom Cursor -->
+    <div id="custom-cursor"></div>
+
+    <!-- Background Orbs -->
+    <div class="fixed top-[-10%] left-[-10%] w-[40vw] h-[40vw] rounded-full bg-electric-cyan opacity-20 filter blur-[150px] mix-blend-screen pointer-events-none z-0"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] rounded-full bg-plasma-purple opacity-20 filter blur-[150px] mix-blend-screen pointer-events-none z-0"></div>
+
+    <!-- Nav -->
+    <nav class="fixed w-full z-50 top-0 pt-6 px-8 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto glass-panel rounded-full px-8 py-4 flex justify-between items-center bg-deep-space/40">
+            <div class="font-display font-bold text-2xl tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-electric-cyan to-plasma-purple hover-target cursor-pointer">
+                ANTIGRAVITY
+            </div>
+            <ul class="hidden md:flex space-x-10 text-xs font-semibold tracking-[0.15em] uppercase">
+                <li><a href="#technology" class="hover-target hover:text-electric-cyan transition-colors duration-300">Technology</a></li>
+                <li><a href="#specs" class="hover-target hover:text-plasma-purple transition-colors duration-300">Specs</a></li>
+            </ul>
+            <button class="hover-target border border-white/20 px-6 py-2 rounded-full text-xs font-bold uppercase tracking-[0.15em] hover:bg-white hover:text-deep-space transition-all duration-300">
+                Sign In
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative min-h-screen flex items-center justify-center pt-20 px-6 lg:px-12 overflow-hidden z-10">
+        <div class="container max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            
+            <!-- Left Text -->
+            <div class="space-y-8 z-10 relative">
+                <h1 class="gs-hero font-display text-5xl md:text-7xl lg:text-8xl font-bold leading-[1.1] tracking-tight">
+                    Weightless.<br>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-electric-cyan to-plasma-purple">Peerless.</span><br>
+                    Future.
+                </h1>
+                
+                <p class="gs-hero text-xl text-gray-400 font-light max-w-md leading-relaxed">
+                    Experience the world's first true propulsion-free levitation technology. The physics of movement, entirely rewritten.
+                </p>
+                
+                <div class="gs-hero pt-8 flex flex-col sm:flex-row gap-6">
+                    <button class="hover-target glow-pulse bg-deep-space border border-white/10 text-white font-bold uppercase tracking-[0.2em] px-10 py-5 rounded-full hover:bg-white hover:text-black transition-all duration-500 shadow-[0_0_20px_rgba(0,240,255,0.3)]">
+                        Pre-Order Now
+                    </button>
+                    <button class="hover-target glass-panel flex items-center justify-center gap-3 text-white font-bold uppercase tracking-[0.2em] px-10 py-5 rounded-full hover:bg-white/10 transition-all duration-300">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Discover
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Image -->
+            <div class="relative gs-hero-img flex justify-center lg:justify-end z-10">
+                <div class="float relative">
+                    <!-- Image reflection/glow underneath -->
+                    <div class="absolute -bottom-10 left-1/2 transform -translate-x-1/2 w-2/3 h-10 bg-electric-cyan rounded-[100%] blur-[40px] opacity-40 mix-blend-screen scale-y-50"></div>
+                    
+                    <img src="file:///C:/Users/Mayank/.gemini/antigravity/brain/e064d3e5-d370-486b-846b-2cfab8cf2101/antigravity_engine_1773826568782.png" 
+                         alt="Antigravity Levitation Engine" 
+                         class="w-full max-w-[500px] lg:max-w-[700px] xl:max-w-[800px] object-contain drop-shadow-[0_20px_50px_rgba(191,0,255,0.3)]">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Specs Section -->
+    <section id="technology" class="py-32 px-6 relative z-10">
+        <div class="max-w-7xl mx-auto">
+            
+            <div class="flex flex-col md:flex-row justify-between items-end mb-20">
+                <div class="gs-reveal max-w-2xl">
+                    <h2 class="font-display text-4xl md:text-5xl font-bold mb-6">Quantum Architecture</h2>
+                    <p class="text-gray-400 text-lg leading-relaxed">
+                        Say goodbye to combustion, aerodynamics, and classical thrust. The Antigravity Engine utilizes point-localized gravity inversion fields to create seamless, omnidirectional travel.
+                    </p>
+                </div>
+                <div class="gs-reveal mt-8 md:mt-0">
+                    <div class="h-[1px] w-32 bg-gradient-to-r from-electric-cyan to-plasma-purple hidden md:block mb-4"></div>
+                    <p class="text-electric-cyan font-bold tracking-[0.2em] uppercase text-sm">v4.0 Protocol Active</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <!-- Card 1 -->
+                <div class="glass-panel group rounded-3xl p-10 hover-target transition-all duration-500 hover:bg-white/5 gs-reveal">
+                    <div class="w-16 h-16 rounded-full glass-panel flex items-center justify-center mb-8 border border-electric-cyan/30 group-hover:scale-110 transition-transform duration-500">
+                        <svg class="w-7 h-7 text-electric-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <h3 class="text-2xl font-display font-bold mb-4 text-white">Zero-Point Drive</h3>
+                    <p class="text-gray-400 leading-relaxed font-light">
+                        Extracts kinetic energy directly from the quantum foam, creating an isolated suspension bubble that negates mass entirely.
+                    </p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="glass-panel group rounded-3xl p-10 hover-target transition-all duration-500 hover:bg-white/5 gs-reveal" style="transition-delay: 100ms;">
+                    <div class="w-16 h-16 rounded-full glass-panel flex items-center justify-center mb-8 border border-plasma-purple/30 group-hover:scale-110 transition-transform duration-500">
+                        <svg class="w-7 h-7 text-plasma-purple" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+                    </div>
+                    <h3 class="text-2xl font-display font-bold mb-4 text-white">Neuro-Kinetic Link</h3>
+                    <p class="text-gray-400 leading-relaxed font-light">
+                        No steering wheels. No joysticks. The engine interfaces directly with the pilot's neocortex for thought-speed maneuverability.
+                    </p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="glass-panel group rounded-3xl p-10 hover-target transition-all duration-500 hover:bg-white/5 gs-reveal" style="transition-delay: 200ms;">
+                    <div class="w-16 h-16 rounded-full glass-panel flex items-center justify-center mb-8 border border-electric-cyan/30 group-hover:scale-110 transition-transform duration-500">
+                        <svg class="w-7 h-7 text-electric-cyan" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                    </div>
+                    <h3 class="text-2xl font-display font-bold mb-4 text-white">Aegis Displacement</h3>
+                    <p class="text-gray-400 leading-relaxed font-light">
+                        Micro-meteorites, atmospheric friction, and physical obstacles are seamlessly routed around the vehicle via spatial bending.
+                    </p>
+                </div>
+                
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="relative z-10 border-t border-white/10 glass-panel bg-deep-space/50 mt-10">
+        <div class="max-w-7xl mx-auto px-6 py-12 flex flex-col md:flex-row items-center justify-between gs-reveal">
+            <div class="font-display font-bold text-2xl tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-r from-electric-cyan to-plasma-purple mb-4 md:mb-0">
+                ANTIGRAVITY
+            </div>
+            <p class="text-gray-500 text-xs uppercase tracking-[0.1em]">© 2026 Antigravity Corp. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <!-- GSAP Animations & Cursor Logic -->
+    <script>
+        // Custom Cursor Support
+        const cursor = document.getElementById('custom-cursor');
+        const hoverElements = document.querySelectorAll('.hover-target');
+
+        // Simple mouse move logic
+        document.addEventListener('mousemove', (e) => {
+            const x = e.clientX;
+            const y = e.clientY;
+            
+            // Fast follow for primary cursor
+            cursor.style.left = `${x}px`;
+            cursor.style.top = `${y}px`;
+        });
+
+        // Hover Effect
+        hoverElements.forEach((el) => {
+            el.addEventListener('mouseenter', () => {
+                cursor.classList.add('hovering');
+            });
+            el.addEventListener('mouseleave', () => {
+                cursor.classList.remove('hovering');
+            });
+        });
+
+        // Hide cursor when leaving window
+        document.addEventListener('mouseleave', () => cursor.style.opacity = 0);
+        document.addEventListener('mouseenter', () => cursor.style.opacity = 1);
+
+        // GSAP ScrollTrigger Setup
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Navbar blur on scroll
+        const nav = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                nav.classList.add('py-4');
+                nav.classList.remove('py-6');
+            } else {
+                nav.classList.add('py-6');
+                nav.classList.remove('py-4');
+            }
+        });
+
+        // Initial Hero Animation
+        gsap.fromTo('.gs-hero', 
+            { y: 50, opacity: 0 },
+            { y: 0, opacity: 1, duration: 1.2, stagger: 0.2, ease: 'power3.out', delay: 0.2 }
+        );
+
+        // Float Image Enter
+        gsap.fromTo('.gs-hero-img',
+            { x: 100, opacity: 0, rotation: 5, scale: 0.9 },
+            { x: 0, opacity: 1, rotation: 0, scale: 1, duration: 2, ease: 'power3.out' }
+        );
+
+        // Scroll Reveal Elements
+        gsap.utils.toArray('.gs-reveal').forEach((elem) => {
+            gsap.fromTo(elem,
+                { y: 40, opacity: 0 },
+                { 
+                    y: 0, 
+                    opacity: 1, 
+                    duration: 1, 
+                    ease: 'power3.out',
+                    scrollTrigger: {
+                        trigger: elem,
+                        start: 'top 85%',
+                        toggleActions: 'play none none reverse'
+                    }
+                }
+            );
+        });
+    </script>
+</body>
+</html>
