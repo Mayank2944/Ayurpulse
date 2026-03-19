@@ -1,0 +1,1974 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ayurpulse | Interactive Ayurvedic Science</title>
+
+<!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- GSAP Core & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <!-- Lenis Smooth Scroll -->
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1/bundled/lenis.min.js"></script>
+
+    <!-- Particles.js -->
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        obsidian: '#0a100d', // Deep forest/earth dark
+                        primary: '#d4af37', // Gold
+                        secondary: '#10b981', // Emerald green
+                        earth: '#8b5a2b',
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'sans-serif'],
+                        display: ['Playfair Display', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+<style>
+    /* Remove smooth-scroll because Lenis handles it */
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap');
+
+body {
+    background-color: #0a100d;
+    color: #e5e7eb;
+    margin: 0;
+    overflow-x: hidden;
+    cursor: none;
+    /* Force hardware acceleration */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+.interactive-target {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+}
+
+.glass-panel {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transform: translateZ(0);
+    will-change: transform;
+}
+
+section {
+    position: relative;
+    will-change: transform;
+    transform: translateZ(0);
+}
+
+        /* Preloader */
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: #0a100d;
+            z-index: 99999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .loader-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 5vw;
+            color: #d4af37;
+            text-shadow: 0 0 30px rgba(212, 175, 55, 0.4);
+            font-weight: 700;
+            font-style: italic;
+        }
+
+        .progress-bar {
+            width: 200px;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 0%;
+            background: #d4af37;
+            box-shadow: 0 0 10px #d4af37;
+        }
+
+        /* Custom Cursor */
+        .cursor-dot {
+            width: 8px;
+            height: 8px;
+            background: #d4af37;
+            border-radius: 50%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            z-index: 100000;
+            pointer-events: none;
+            mix-blend-mode: exclusion;
+        }
+
+        .cursor-ring {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            border-radius: 50%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            z-index: 99999;
+            pointer-events: none;
+            transition: width 0.4s ease, height 0.4s ease, border-color 0.4s ease, background 0.4s ease;
+        }
+
+        .cursor-ring.hovering {
+            width: 80px;
+            height: 80px;
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.05);
+            backdrop-filter: blur(2px);
+        }
+
+        /* Particles absolute container */
+        #particles-js {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* Base Z-index adjustment for content */
+        .content-layer {
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Glass Panels */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            transition: border-color 0.4s ease, box-shadow 0.4s ease;
+        }
+
+        /* Outline glowing button */
+        .btn-glow {
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-glow::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 9999px;
+            background: linear-gradient(90deg, #d4af37, #10b981);
+            z-index: -1;
+            filter: blur(12px);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .btn-glow:hover::before {
+            opacity: 0.4;
+        }
+
+        /* Horizontal Scroll Container */
+        .horizontal-scroll-wrapper {
+            width: 400vw;
+            height: 100vh;
+            display: flex;
+            flex-wrap: nowrap;
+            overflow: hidden;
+            will-change: transform;
+        }
+
+        .horizontal-panel {
+            min-width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4rem;
+        }
+
+        /* 3D Tilt Card */
+        .tilt-card {
+            transform-style: preserve-3d;
+            perspective: 1200px;
+        }
+
+        .tilt-inner {
+            transform: translateZ(40px);
+        }
+
+        /* Image Formatting */
+        .img-hero {
+            animation: float 8s ease-in-out infinite;
+            mix-blend-mode: screen;
+        }
+
+        /* Dosha Variations using Hue-Rotate on base image */
+        .dosha-vata {
+            filter: hue-rotate(180deg) saturate(0.8) drop-shadow(0 20px 40px rgba(135, 206, 235, 0.2));
+        }
+
+        /* Air/Blue */
+        .dosha-pitta {
+            filter: hue-rotate(330deg) saturate(1.5) drop-shadow(0 20px 40px rgba(255, 69, 0, 0.2));
+        }
+
+        /* Fire/Red */
+        .dosha-kapha {
+            filter: hue-rotate(90deg) saturate(1.2) drop-shadow(0 20px 40px rgba(34, 139, 34, 0.2));
+        }
+
+        /* Earth/Green */
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-30px);
+            }
+        }
+
+        /* Text Scramble utility class */
+        .scramble-text {
+            display: inline-block;
+        }
+
+        /* Form input focus fx */
+        .input-glow:focus {
+            box-shadow: 0 0 20px rgba(212, 175, 55, 0.1) inset, 0 0 10px rgba(212, 175, 55, 0.1);
+            border-color: rgba(212, 175, 55, 0.5);
+        }
+    </style>
+</head>
+
+<body class="antialiased selection:bg-primary selection:text-obsidian">
+
+    <!-- Preloader -->
+    <div id="preloader">
+        <div class="loader-text scramble-text" data-scramble="Awakening...">Breath</div>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <div class="mt-4 text-xs tracking-[0.3em] text-primary uppercase font-sans scramble-text"
+            data-scramble="ALIGNING CHAKRAS...">SEEKING BALANCE...</div>
+    </div>
+
+    <!-- Custom Cursor -->
+    <div class="cursor-dot" id="cursor-dot"></div>
+    <div class="cursor-ring" id="cursor-ring"></div>
+
+    <!-- Particles Background -->
+    <div id="particles-js"></div>
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 top-0 pt-6 px-8 content-layer magnetic-nav" id="navbar">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+<div class="font-display italic font-bold text-2xl tracking-widest text-primary interactive-target scramble-text"
+    data-scramble="AYURPULSE">
+    AYURPULSE
+</div>
+            <ul class="hidden md:flex space-x-12 text-xs font-light tracking-[0.2em] uppercase text-gray-300 font-sans">
+                <li><a href="#hero"
+                        class="interactive-target hover:text-primary transition-colors duration-300 scramble-text"
+                        data-scramble="ORIGINS">ORIGINS</a></li>
+<li><a href="#horizontal-models"
+        class="interactive-target hover:text-primary transition-colors duration-300 scramble-text"
+        data-scramble="DOSHAS">DOSHAS</a></li>
+<li><a href="#assessment"
+        class="interactive-target hover:text-primary transition-colors duration-300 scramble-text"
+        data-scramble="ASSESSMENT">ASSESSMENT</a></li>
+<li><a href="#features"
+                        class="interactive-target hover:text-primary transition-colors duration-300 scramble-text"
+                        data-scramble="PRACTICES">PRACTICES</a></li>
+            </ul>
+            <a href="#contact"
+                class="interactive-target border border-primary/40 text-primary px-6 py-2 rounded-full text-xs tracking-[0.2em] hover:bg-primary hover:text-obsidian transition-all uppercase font-sans btn-glow scramble-text"
+                data-scramble="CONSULT">
+                CONSULT
+            </a>
+        </div>
+    </nav>
+
+    <div class="content-layer">
+
+        <!-- 1. Interactive Hero Section -->
+        <header id="hero" class="relative min-h-screen flex items-center justify-center pt-20 px-6 overflow-hidden">
+            <div class="container max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
+
+                <div class="space-y-8 gs-hero z-20 pointer-events-none">
+                    <p class="text-secondary font-sans text-xs uppercase tracking-[0.4em] scramble-text"
+                        data-scramble="A 5000-YEAR OLD SCIENCE">ANCIENT KNOWLEDGE RENEWED</p>
+                    <h1 class="font-display italic text-6xl md:text-8xl font-black leading-[1.1] text-white scramble-text"
+                        data-scramble="HARMONY WITHIN.">
+                        HARMONY<br><span
+                            class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary font-sans not-italic font-light tracking-tighter">WITHIN.</span>
+                    </h1>
+                    <p class="text-gray-400 text-lg font-light max-w-md leading-relaxed font-sans">
+                        Interact with the science of life. Drag, hover, and explore your unique constitution based on
+                        the ancient principles of Ayurveda.
+                    </p>
+                    <div class="pt-8 pointer-events-auto">
+                        <!-- Magnetic Button -->
+                        <div class="magnetic-wrap inline-block interactive-target">
+                            <button
+                                onclick="document.getElementById('assessment').scrollIntoView({ behavior: 'smooth' })"
+                                class="magnetic-btn border border-primary/50 text-primary hover:bg-primary hover:text-obsidian transition-colors font-light uppercase tracking-[0.2em] px-10 py-5 rounded-full text-sm font-sans">
+                                Discover Your Dosha
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3D Mouse Parallax Image -->
+                <div class="relative z-10 flex justify-center h-[600px] w-full" id="parallax-container">
+                    <div class="absolute w-[80%] h-10 bg-primary/30 rounded-[100%] blur-[60px] mix-blend-screen scale-y-50 bottom-10" id="hero-shadow"></div>
+                    <img src="static/images/ayurveda_hero.png" alt="Ayurveda Herbs and Meditations" id="parallax-hero" class="img-hero w-full max-w-[700px] object-cover absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 cursor-crosshair interactive-target rounded-[60px] border border-primary/20 shadow-[0_0_50px_rgba(212,175,55,0.15)] transition-all duration-700 hover:scale-[1.02] hover:border-primary/40">
+                </div>
+            </div>
+
+            <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 text-white/30 text-xs tracking-[0.3em] font-sans uppercase text-center scramble-text" data-scramble="SCROLL TO AWAKEN">
+                SCROLL TO AWAKEN <br>
+                <span class="block mt-4 animate-bounce text-primary/50">↓</span>
+            </div>
+        </header>
+
+<!-- 2. GSAP Horizontal Scroll Section for Doshas -->
+<section id="horizontal-models" class="relative z-20 bg-obsidian border-y border-white/5">
+    <!-- This wrapper pins and scrolls horizontally inside -->
+            <div class="horizontal-scroll-wrapper" id="scroll-wrapper">
+
+                <!-- Panel 1: Intro -->
+                <div class="horizontal-panel flex-col items-start justify-center text-left max-w-3xl mx-auto panel">
+                    <h2 class="font-display italic text-6xl md:text-8xl mb-6 text-primary scramble-text"
+                        data-scramble="THE THREE DOSHAS">The Three Doshas</h2>
+                    <p
+                        class="text-xl text-gray-400 font-light leading-relaxed font-sans mt-4 border-l-2 border-secondary pl-6">
+                        According to Ayurveda, our physical and mental makeup is governed by three fundamental energies.
+                        Scroll horizontally to unearth the building blocks of nature and self.
+                    </p>
+                </div>
+
+                <!-- Panel 2: VATA -->
+                <div class="horizontal-panel panel relative">
+                    <div
+                        class="absolute inset-0 bg-blue-500/5 blur-[150px] -z-10 rounded-full w-[50vw] h-[50vw] top-1/4 left-1/4">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 w-full max-w-7xl">
+                        <!-- 3D Tilt Wrapper -->
+<div class="tilt-card w-full h-full flex items-center justify-center interactive-target">
+    <img src="static/images/ayurveda_doshas.png"
+        class="dosha-vata w-full max-w-[500px] rounded-full tilt-inner object-cover">
+                        </div>
+                        <div class="flex flex-col justify-center space-y-6">
+                            <p class="text-blue-300 font-sans text-sm tracking-[0.3em] uppercase">Elements: Air & Ether
+                            </p>
+                            <h3 class="font-display italic text-6xl text-white">Vata</h3>
+                            <div class="glass-panel p-8 rounded-2xl grid grid-cols-2 gap-6 relative overflow-hidden">
+                                <div
+                                    class="absolute right-0 top-0 text-blue-500/10 text-9xl font-display opacity-50 italic -translate-y-4">
+                                    V</div>
+                                <div class="relative z-10"><span
+                                        class="text-gray-400 text-xs font-sans uppercase tracking-widest block mb-2">ENERGY</span><strong
+                                        class="text-xl font-light text-white">Movement</strong></div>
+                                <div class="relative z-10"><span
+                                        class="text-gray-400 text-xs font-sans uppercase tracking-widest block mb-2">NATURE</span><strong
+                                        class="text-xl font-light text-white">Creative, Light</strong></div>
+                                <div class="relative z-10"><span
+                                        class="text-gray-400 text-xs font-sans uppercase tracking-widest block mb-2">SEASON</span><strong
+                                        class="text-xl font-light text-white">Autumn / Winter</strong></div>
+                                <div class="relative z-10"><span
+                                        class="text-gray-400 text-xs font-sans uppercase tracking-widest block mb-2">SEAT</span><strong
+                                        class="text-xl font-light text-white">Colon</strong></div>
+                            </div>
+
+                            <button onclick="window.location.href = 'dashboard.html'"
+                                class="interactive-target self-start border-b border-blue-300 text-blue-300 pb-1 text-xs uppercase tracking-widest font-sans hover:text-white transition-all">Balance Vata</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel 3: PITTA -->
+                <div class="horizontal-panel panel relative">
+                    <div
+                        class="absolute inset-0 bg-red-500/5 blur-[150px] -z-10 rounded-full w-[50vw] h-[50vw] top-1/4 left-1/4">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 w-full max-w-7xl">
+                        <div class="flex flex-col justify-center space-y-6 md:order-1 order-2">
+                            <p class="text-red-400 font-sans text-sm tracking-[0.3em] uppercase">Elements: Fire & Water</p>
+                            <h3 class="font-display italic text-6xl text-white">Pitta</h3>
+                            <div class="glass-panel p-8 rounded-2xl grid grid-cols-2 gap-6 relative overflow-hidden">
+                                <div class="absolute right-0 top-0 text-red-500/10 text-9xl font-display opacity-50 italic -translate-y-4">P</div>
+                                <div class="relative z-10"><span class="text-gray-400 text-xs font-sans uppercase tracking-widest block mb-2">ENERGY</span><strong class="text-xl font-light text-white">Digestion</strong></div>
+                                <div class="relative z-10"><span class="text-gray-400 text-xs font-sans uppercase tracking-widest block mb-2">NATURE</span><strong class="text-xl font-light text-white">Intense, Sharp</strong></div>
+                                <div class="relative z-10"><span class="text-gray-400 text-xs font-sans uppercase tracking-widest block mb-2">SEASON</span><strong class="text-xl font-light text-white">Summer</strong></div>
+                                <div class="relative z-10"><span class="text-gray-400 text-xs font-sans uppercase tracking-widest block mb-2">SEAT</span><strong class="text-xl font-light text-white">Small Intestine</strong></div>
+                            </div>
+                            <button onclick="window.location.href = 'dashboard.html'" class="interactive-target self-start border-b border-red-400 text-red-400 pb-1 text-xs uppercase tracking-widest font-sans hover:text-white transition-all">Balance Pitta</button>
+                        </div>
+                        <div class="tilt-card w-full h-full flex items-center justify-center interactive-target md:order-2 order-1">
+                            <img src="static/images/ayurveda_doshas.png" class="dosha-pitta w-full max-w-[500px] rounded-full tilt-inner object-cover">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel 4: KAPHA -->
+                <div class="horizontal-panel panel relative">
+                    <div
+                        class="absolute inset-0 bg-green-500/5 blur-[150px] -z-10 rounded-full w-[50vw] h-[50vw] top-1/4 left-1/4">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 w-full max-w-7xl">
+                        <div class="tilt-card w-full h-full flex items-center justify-center interactive-target">
+                            <img src="static/images/ayurveda_doshas.png" class="dosha-kapha w-full max-w-[500px] rounded-full tilt-inner object-cover">
+                        </div>
+                        <div class="flex flex-col justify-center space-y-6">
+                            <p class="text-green-500 font-sans text-sm tracking-[0.3em] uppercase">Elements: Earth & Water</p>
+    <h3 class="font-display italic text-6xl text-white">Kapha</h3>
+    <div class="glass-panel p-8 rounded-2xl grid grid-cols-2 gap-6 relative overflow-hidden">
+        <div
+            class="absolute right-0 top-0 text-green-500/10 text-9xl font-display opacity-50 italic -translate-y-4">
+            K</div>
+        <div class="relative z-10"><span
+                class="text-gray-400 text-xs font-sans uppercase tracking-widest block mb-2">ENERGY</span><strong
+                class="text-xl font-light text-white">Structure</strong></div>
+        <div class="relative z-10"><span
+                class="text-gray-400 text-xs font-sans uppercase tracking-widest block mb-2">NATURE</span><strong
+                class="text-xl font-light text-white">Grounded, Calm</strong></div>
+        <div class="relative z-10"><span
+                class="text-gray-400 text-xs font-sans uppercase tracking-widest block mb-2">SEASON</span><strong
+                class="text-xl font-light text-white">Spring</strong></div>
+        <div class="relative z-10"><span
+                class="text-gray-400 text-xs font-sans uppercase tracking-widest block mb-2">SEAT</span><strong
+                class="text-xl font-light text-white">Lungs / Chest</strong></div>
+    </div>
+    <button onclick="window.location.href = 'dashboard.html'"
+        class="interactive-target self-start border-b border-green-500 text-green-500 pb-1 text-xs uppercase tracking-widest font-sans hover:text-white transition-all">Balance
+                                Kapha</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+<!-- 3. Interactive Practices Section (3D Tilt Cards) -->
+<section id="features" class="py-32 px-6 relative z-30">
+    <div class="max-w-7xl mx-auto">
+                <div class="text-center mb-24 gs-fade">
+                    <h2 class="font-display italic text-5xl md:text-6xl text-primary mb-4 scramble-text"
+                        data-scramble="Holistic Rituals">Holistic Rituals</h2>
+                    <p class="text-gray-400 font-sans font-light text-sm max-w-2xl mx-auto">Hover to explore the central
+                        pillars of an Ayurvedic lifestyle, harmonizing body, mind, and spirit.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+<!-- Holistic Card 1 -->
+<div class="tilt-card interactive-target w-full h-[450px] cursor-pointer" onclick="openAgni()">
+    <div
+        class="glass-panel w-full h-full p-8 rounded-3xl flex flex-col justify-between tilt-inner border-t border-primary/20 hover:border-primary transition-colors group relative overflow-hidden">
+        <!-- Background Image -->
+        <img src="static/images/ayurveda_history.png"
+            class="absolute inset-0 w-full h-full object-cover opacity-10 group-hover:opacity-30 group-hover:scale-110 transition-all duration-700 pointer-events-none filter grayscale">
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-obsidian via-transparent to-transparent z-0">
+                            </div>
+
+                            <div class="relative z-10">
+                                <h3 class="font-display italic text-3xl mb-3 text-white">Herbal Alchemy</h3>
+                                <p class="text-gray-300 font-light text-sm leading-relaxed">The use of nature's
+                                    pharmacy—adaptogens, warming spices, and roots to ignite Agni (digestive fire) and
+                                    cleanse Ama (toxins) from cellular tissues.</p>
+                            </div>
+                            <div
+                                class="text-primary font-sans text-xs tracking-widest uppercase opacity-0 transform translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 z-10 relative">
+                                AWAKEN AGNI</div>
+                        </div>
+                    </div>
+
+<!-- Holistic Card 2 -->
+<div class="tilt-card interactive-target w-full h-[450px] cursor-pointer" onclick="openRhythm()">
+    <div
+        class="glass-panel w-full h-full p-8 rounded-3xl flex flex-col justify-between tilt-inner border-t border-secondary/20 hover:border-secondary transition-colors group relative overflow-hidden">
+        <img src="static/images/ayurveda_history.png"
+            class="absolute inset-0 w-full h-full object-cover opacity-10 group-hover:opacity-30 group-hover:scale-110 transition-all duration-700 pointer-events-none filter sepia hue-rotate-90">
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-obsidian via-transparent to-transparent z-0">
+                            </div>
+
+                            <div class="relative z-10">
+                                <h3 class="font-display italic text-3xl mb-3 text-white">Dinacharya</h3>
+                                <p class="text-gray-300 font-light text-sm leading-relaxed">Daily routines aligned with
+                                    the sun's rhythm. Tongue scraping, oil pulling, and Abhyanga (warm oil massage) to
+                                    ground the nervous system daily.</p>
+                            </div>
+                            <div
+                                class="text-secondary font-sans text-xs tracking-widest uppercase opacity-0 transform translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 z-10 relative">
+                                ESTABLISH RHYTHM</div>
+                        </div>
+                    </div>
+
+<!-- Holistic Card 3 -->
+<div class="tilt-card interactive-target w-full h-[450px] cursor-pointer" onclick="openPrana()">
+    <div
+        class="glass-panel w-full h-full p-8 rounded-3xl flex flex-col justify-between tilt-inner border-t border-earth/40 hover:border-earth transition-colors group relative overflow-hidden">
+        <img src="static/images/ayurveda_hero.png"
+            class="absolute inset-0 w-full h-full object-cover opacity-10 group-hover:opacity-30 group-hover:scale-110 transition-all duration-700 pointer-events-none filter grayscale sepia">
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-obsidian via-transparent to-transparent z-0">
+                            </div>
+
+                            <div class="relative z-10">
+                                <h3 class="font-display italic text-3xl mb-3 text-white">Yogic Prana</h3>
+                                <p class="text-gray-300 font-light text-sm leading-relaxed">Breathwork (Pranayama) and
+                                    Asana practice prescribed specifically for your active Dosha, moving stagnant
+                                    life-force (Prana) and clearing nadis (channels).</p>
+                            </div>
+                            <div
+                                class="text-earth font-sans text-xs tracking-widest uppercase opacity-0 transform translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300 z-10 relative">
+                                MOVE PRANA</div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+
+        <!-- 4. Interactive Prakriti Assessment (25 Questions) -->
+        <section id="assessment" class="py-32 px-6 relative z-10 border-t border-primary/10 bg-[#060a08]/50">
+            <div class="max-w-4xl mx-auto gs-fade">
+                <div class="text-center mb-16">
+                    <p class="text-primary font-sans text-xs tracking-[0.4em] uppercase mb-4">Self Discovery</p>
+                    <h2 class="font-display italic text-5xl text-white">Prakriti assessment</h2>
+                    <p class="text-gray-500 font-sans font-light text-sm mt-4">Uncover your unique Ayurvedic
+                        constitution through 25 fundamental pillars of nature.</p>
+                </div>
+
+                <!-- Assessment Card -->
+                <div class="glass-panel p-10 md:p-16 rounded-[40px] relative overflow-hidden border border-primary/20 bg-obsidians/40 shadow-2xl min-h-[500px] flex flex-col justify-between"
+                    id="quiz-container">
+
+                    <!-- Progress Bar -->
+                    <div class="absolute top-0 left-0 w-full h-1 bg-white/5">
+                        <div id="quiz-progress"
+                            class="h-full bg-gradient-to-r from-primary to-secondary transition-all duration-500"
+                            style="width: 4%;"></div>
+                    </div>
+
+                    <!-- Question Content -->
+                    <div id="quiz-content" class="relative z-10 transition-all duration-500">
+                        <p class="text-secondary font-sans text-[10px] tracking-[0.3em] uppercase mb-8" id="quiz-step">
+                            PILLAR 1 OF 25</p>
+                        <h3 class="font-display italic text-4xl text-white mb-10 leading-relaxed" id="quiz-question">
+                            Body frame</h3>
+
+                        <div class="grid grid-cols-1 gap-6" id="quiz-options">
+                            <!-- Options Injected Here -->
+                            <button onclick="handleAnswer('a')"
+                                class="interactive-target w-full text-left p-6 rounded-2xl border border-white/10 hover:border-primary/50 hover:bg-primary/5 transition-all group flex items-center justify-between">
+                                <span class="text-gray-300 font-sans font-light text-lg group-hover:text-white"
+                                    id="opt-a">Thin, underweight (A)</span>
+                                <span class="text-primary opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                            </button>
+                            <button onclick="handleAnswer('b')"
+                                class="interactive-target w-full text-left p-6 rounded-2xl border border-white/10 hover:border-primary/50 hover:bg-primary/5 transition-all group flex items-center justify-between">
+                                <span class="text-gray-300 font-sans font-light text-lg group-hover:text-white"
+                                    id="opt-b">Medium, muscular (B)</span>
+                                <span class="text-primary opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                            </button>
+                            <button onclick="handleAnswer('c')"
+                                class="interactive-target w-full text-left p-6 rounded-2xl border border-white/10 hover:border-primary/50 hover:bg-primary/5 transition-all group flex items-center justify-between">
+                                <span class="text-gray-300 font-sans font-light text-lg group-hover:text-white"
+                                    id="opt-c">Broad, well-built (C)</span>
+                                <span class="text-primary opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Result Content (Hidden Initially) -->
+                    <div id="quiz-result" class="hidden relative z-10 text-center space-y-8 py-10">
+                        <div
+                            class="w-24 h-24 bg-primary/20 rounded-full border border-primary/40 flex items-center justify-center mx-auto mb-6">
+                            <svg class="w-12 h-12 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <h3 class="font-display italic text-5xl text-white" id="result-title">Your Balance Reclaimed
+                        </h3>
+                        <p class="text-gray-400 font-sans font-light text-lg max-w-md mx-auto" id="result-desc">Your
+                            dominant energy has been identified. Explore your personalized dashboard for deeper
+                            guidance.</p>
+                        <div class="pt-6">
+                            <button onclick="window.location.href='dashboard.html'"
+                                class="btn-glow border border-primary/50 text-white px-12 py-4 rounded-full font-sans uppercase tracking-[0.3em] text-xs hover:bg-primary hover:text-obsidian transition-all">View
+                                Dashboard</button>
+                        </div>
+                    </div>
+
+                    <!-- Nav Buttons -->
+                    <div class="flex justify-between items-center mt-12 pt-8 border-t border-white/5 relative z-10"
+                        id="quiz-nav">
+                        <button onclick="prevQuestion()"
+                            class="text-gray-500 hover:text-white transition-colors text-[10px] tracking-widest uppercase font-sans flex items-center gap-2 group">
+                            <span class="group-hover:-translate-x-1 transition-transform">←</span> Previous
+                        </button>
+                        <span class="text-gray-700 text-xs tracking-widest">AYURPULSE AUTHENTICATED</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="data" class="py-32 px-6 relative z-10 border-t border-primary/10 bg-gradient-to-b from-transparent to-[#050806]">
+            <div class="max-w-6xl mx-auto">
+                <div class="text-center mb-16">
+                    <p class="text-primary font-sans text-xs tracking-[0.4em] uppercase mb-4">Latest Vitals</p>
+                    <h2 class="font-display italic text-4xl md:text-5xl font-black text-white mb-4">Real-Time Biometric Data</h2>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-8">
+                    <!-- Vata Card -->
+                    <div class="glass-panel p-8 rounded-[20px] border border-primary/20 hover:border-primary/50 transition-all duration-300">
+                        <div class="flex flex-col items-center">
+                            <p class="text-primary font-sans text-xs tracking-[0.2em] uppercase mb-4">Vata</p>
+                            <div class="text-5xl font-bold text-white mb-2" id="vata-value">--</div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-primary h-2 rounded-full transition-all" id="vata-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pitta Card -->
+                    <div class="glass-panel p-8 rounded-[20px] border border-secondary/20 hover:border-secondary/50 transition-all duration-300">
+                        <div class="flex flex-col items-center">
+                            <p class="text-secondary font-sans text-xs tracking-[0.2em] uppercase mb-4">Pitta</p>
+                            <div class="text-5xl font-bold text-white mb-2" id="pitta-value">--</div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-secondary h-2 rounded-full transition-all" id="pitta-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kapha Card -->
+                    <div class="glass-panel p-8 rounded-[20px] border border-earth/20 hover:border-earth/50 transition-all duration-300">
+                        <div class="flex flex-col items-center">
+                            <p class="text-earth font-sans text-xs tracking-[0.2em] uppercase mb-4">Kapha</p>
+                            <div class="text-5xl font-bold text-white mb-2" id="kapha-value">--</div>
+                            <div class="w-full bg-gray-700 rounded-full h-2">
+                                <div class="bg-earth h-2 rounded-full transition-all" id="kapha-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Temperature Card -->
+                    <div class="glass-panel p-8 rounded-[20px] border border-orange-500/20 hover:border-orange-500/50 transition-all duration-300">
+                        <div class="flex flex-col items-center">
+                            <p class="text-orange-500 font-sans text-xs tracking-[0.2em] uppercase mb-4">Temperature</p>
+                            <div class="text-5xl font-bold text-white mb-2" id="temp-value">--</div>
+                            <p class="text-gray-400 text-sm">°C</p>
+                        </div>
+                    </div>
+                    <!-- Prediction Card -->
+                    <div class="glass-panel p-8 rounded-[20px] border border-orange-500/20 hover:border-orange-500/50 transition-all duration-300">
+                        <div class="flex flex-col items-center">
+                            <p class="text-orange-500 font-sans text-xs tracking-[0.2em] uppercase mb-4">Predicted Dosh</p>
+                            <div class="text-5xl font-bold text-white mb-2" id="predict-value">--</div>
+                            <!-- <p class="text-gray-400 text-sm">°C</p> -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. Interactive Consultation Form -->
+
+        <!-- 4. Interactive Consultation Form -->
+
+        <section id="contact"
+            class="py-32 px-6 relative z-10 border-t border-primary/10 bg-gradient-to-b from-transparent to-[#050806]">
+            <div
+                class="max-w-4xl mx-auto glass-panel p-10 md:p-16 rounded-[40px] gs-fade relative overflow-hidden border border-primary/20">
+                <!-- Glitch/Glow background elements -->
+                <div
+                    class="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2 pointer-events-none">
+                </div>
+
+                <div class="text-center mb-16 relative z-10">
+                    <p class="text-primary font-sans text-xs tracking-[0.4em] uppercase mb-4 scramble-text"
+                        data-scramble="COMMENCE HEALING">Begin Your Journey</p>
+                    <h2 class="font-display italic text-4xl md:text-5xl font-black text-white">Request Consultation</h2>
+                </div>
+
+
+                <form class="space-y-10 relative z-10" action="/create" method="GET">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div class="group relative">
+                            <input type="text" id="name" required
+                                class="w-full bg-transparent border-b border-white/20 pb-4 text-white font-sans focus:outline-none input-glow transition-all interactive-target peer"
+                                placeholder=" ">
+                            <label for="name"
+                                class="absolute left-0 top-0 text-gray-500 font-sans text-sm tracking-widest transition-all peer-focus:-top-6 peer-focus:text-xs peer-focus:text-primary peer-valid:-top-6 peer-valid:text-xs peer-valid:text-gray-400 pointer-events-none uppercase">Your
+                                Name</label>
+                        </div>
+                        <div class="group relative">
+                            <input type="email" id="email" required
+                                class="w-full bg-transparent border-b border-white/20 pb-4 text-white font-sans focus:outline-none input-glow transition-all interactive-target peer"
+                                placeholder=" ">
+                            <label for="email"
+                                class="absolute left-0 top-0 text-gray-500 font-sans text-sm tracking-widest transition-all peer-focus:-top-6 peer-focus:text-xs peer-focus:text-primary peer-valid:-top-6 peer-valid:text-xs peer-valid:text-gray-400 pointer-events-none uppercase">Your
+                                Email</label>
+                        </div>
+                    </div>
+
+                    <div class="group relative pt-4">
+                        <label
+                            class="block text-gray-500 font-sans text-xs uppercase tracking-widest mb-6 text-center">Current
+                            Imbalance (Vikriti) Focus</label>
+                        <div class="grid grid-cols-3 gap-6">
+                            <label class="interactive-target cursor-pointer relative">
+                                <input type="radio" name="focus" class="peer sr-only">
+                                <div
+                                    class="glass-panel py-5 text-center rounded-2xl border border-white/10 peer-checked:border-primary peer-checked:bg-primary/5 peer-checked:text-primary transition-all shadow-lg hover:shadow-primary/20">
+                                    <span class="font-light text-sm tracking-widest uppercase">Digestion</span>
+                                </div>
+                            </label>
+                            <label class="interactive-target cursor-pointer relative">
+                                <input type="radio" name="focus" class="peer sr-only">
+                                <div
+                                    class="glass-panel py-5 text-center rounded-2xl border border-white/10 peer-checked:border-primary peer-checked:bg-primary/5 peer-checked:text-primary transition-all shadow-lg hover:shadow-primary/20">
+                                    <span class="font-light text-sm tracking-widest uppercase">Anxiety</span>
+                                </div>
+                            </label>
+                            <label class="interactive-target cursor-pointer relative">
+                                <input type="radio" name="focus" class="peer sr-only" checked>
+                                <div
+                                    class="glass-panel py-5 text-center rounded-2xl border border-white/10 peer-checked:border-primary peer-checked:bg-primary/5 peer-checked:text-primary transition-all shadow-lg hover:shadow-primary/20">
+                                    <span class="font-light text-sm tracking-widest uppercase">Detox</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="pt-10">
+                        <div class="magnetic-wrap w-full interactive-target group relative overflow-hidden rounded-full">
+                            <button type="button" onclick="document.getElementById('assessment').scrollIntoView({ behavior: 'smooth' })" class="magnetic-btn w-full py-6 font-light uppercase tracking-[0.4em] text-sm bg-primary/10 border border-primary/50 text-primary rounded-full transition-colors font-sans relative z-10 group-hover:border-transparent">
+                                <span class="scramble-text inline-block" id="btn-text" data-scramble="ALIGN ELEMENTS">Begin Healing</span>
+                            </button>
+                            <!-- Hover fill effect -->
+                            <div class="absolute inset-0 bg-gradient-to-r from-primary to-secondary opacity-0 group-hover:opacity-100 transition-all duration-700 ease-out z-0"></div>
+                            <span class="absolute inset-0 flex items-center justify-center text-obsidian tracking-[0.4em] text-sm font-bold uppercase opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-20">Begin Healing</span>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="py-16 border-t border-white/5 text-center relative z-10 gs-fade bg-obsidian/80">
+<div class="font-display italic font-bold text-3xl tracking-[0.2em] text-primary mb-6 interactive-target inline-block scramble-text"
+    data-scramble="AYURPULSE">AYURPULSE AYURVEDA</div>
+            <p class="text-gray-500 text-xs font-sans uppercase tracking-[0.3em] font-light">The Science of Life. © 2026
+            </p>
+        </footer>
+
+    </div>
+
+    <!-- Custom Modals -->
+    <div id="ayur-modals" class="fixed inset-0 z-[99999] hidden flex justify-center items-center pointer-events-none">
+        <div class="absolute inset-0 bg-obsidian/90 backdrop-blur-md transition-opacity duration-500 opacity-0"
+            id="modal-bg"></div>
+
+        <!-- Agni Modal -->
+        <div id="modal-agni"
+            class="glass-panel p-10 rounded-[40px] max-w-lg w-full transform scale-95 opacity-0 transition-all duration-500 hidden z-10 pointer-events-auto">
+            <h3 class="font-display italic text-4xl text-primary mb-4">Awaken Agni</h3>
+            <p class="text-gray-300 font-sans font-light mb-6">Your digestive fire is the root of your health. Let's
+                kindle it.</p>
+            <div class="bg-primary/10 rounded-2xl p-6 border border-primary/20 text-center relative overflow-hidden">
+                <div
+                    class="absolute inset-0 bg-[url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><circle cx=%2250%22 cy=%2250%22 r=%2240%22 fill=%22none%22 stroke=%22rgba(212,175,55,0.2)%22 stroke-width=%222%22/></svg>')] bg-center bg-no-repeat bg-contain opacity-50 animate-spin-slow">
+                </div>
+                <h4 class="text-white font-bold tracking-widest uppercase text-sm mb-2">Current Recommendation</h4>
+                <p class="text-primary italic font-display text-xl" id="agni-recommendation">Processing temporal
+                    alignment...</p>
+            </div>
+            <button onclick="closeModals()"
+                class="mt-8 w-full border border-gray-600 hover:border-primary text-gray-400 hover:text-white px-6 py-3 rounded-full transition-all text-xs tracking-widest uppercase">Close</button>
+        </div>
+
+        <!-- Rhythm Modal -->
+        <div id="modal-rhythm"
+            class="glass-panel p-10 rounded-[40px] max-w-lg w-full transform scale-95 opacity-0 transition-all duration-500 hidden z-10 pointer-events-auto">
+            <h3 class="font-display italic text-4xl text-secondary mb-4">Establish Rhythm</h3>
+            <p class="text-gray-300 font-sans font-light mb-6">Align your macrocosm with the microcosm of your body.</p>
+            <ul class="space-y-4 font-sans text-sm text-gray-400">
+                <li class="flex items-center"><span
+                        class="w-2 h-2 rounded-full bg-secondary mr-3 shadow-[0_0_10px_#10b981]"></span> <strong>06:00
+                        AM</strong> - Wake up & Tongue Scraping</li>
+                <li class="flex items-center"><span
+                        class="w-2 h-2 rounded-full bg-secondary mr-3 shadow-[0_0_10px_#10b981]"></span> <strong>07:00
+                        AM</strong> - Yoga & Light Meditation</li>
+                <li class="flex items-center"><span
+                        class="w-2 h-2 rounded-full bg-secondary mr-3 shadow-[0_0_10px_#10b981]"></span> <strong>12:30
+                        PM</strong> - Largest Meal of the Day</li>
+                <li class="flex items-center"><span
+                        class="w-2 h-2 rounded-full bg-secondary mr-3 shadow-[0_0_10px_#10b981]"></span> <strong>08:00
+                        PM</strong> - Digital Sunset</li>
+                <li class="flex items-center"><span
+                        class="w-2 h-2 rounded-full bg-secondary mr-3 shadow-[0_0_10px_#10b981]"></span> <strong>10:00
+                        PM</strong> - Restorative Sleep</li>
+            </ul>
+            <button onclick="closeModals()"
+                class="mt-8 w-full border border-gray-600 hover:border-secondary text-gray-400 hover:text-white px-6 py-3 rounded-full transition-all text-xs tracking-widest uppercase">Close</button>
+        </div>
+
+        <!-- Prana Modal -->
+        <div id="modal-prana"
+            class="glass-panel p-10 rounded-[40px] max-w-lg w-full transform scale-95 opacity-0 transition-all duration-500 hidden z-10 pointer-events-auto text-center border-t border-earth/40">
+            <h3 class="font-display italic text-4xl text-earth mb-2">Move Prana</h3>
+            <p class="text-gray-300 font-sans font-light mb-8 text-sm">Follow the pulsing circle to regulate your
+                nervous system.</p>
+
+            <div class="relative w-48 h-48 mx-auto flex items-center justify-center mb-8">
+                <div id="prana-circle"
+                    class="absolute w-24 h-24 bg-gradient-to-tr from-earth to-primary rounded-full blur-md opacity-50 transition-all duration-[4000ms] ease-in-out">
+                </div>
+                <div id="prana-inner"
+                    class="absolute w-24 h-24 bg-obsidian rounded-full border border-earth/50 flex items-center justify-center transition-all duration-[4000ms] ease-in-out z-10 shadow-[0_0_30px_rgba(139,90,43,0.3)]">
+                    <span id="prana-text" class="text-white font-sans text-xs tracking-widest uppercase">Inhale</span>
+                </div>
+            </div>
+
+            <button onclick="closeModals()"
+                class="mt-4 w-full border border-gray-600 hover:border-earth text-gray-400 hover:text-white px-6 py-3 rounded-full transition-all text-xs tracking-widest uppercase">End
+                Session</button>
+        </div>
+    </div>
+
+    <!-- Scripts for all Interactions -->
+    <script>
+
+        // --- Modal & Ritual Logic ---
+        const modalContainer = document.getElementById('ayur-modals');
+        const modalBg = document.getElementById('modal-bg');
+        let pranaInterval;
+
+        function showModalContainer() {
+            modalContainer.classList.remove('hidden');
+            setTimeout(() => {
+                modalBg.classList.remove('opacity-0');
+                modalBg.classList.add('opacity-100');
+            }, 10);
+        }
+
+        function revealModal(id) {
+            const el = document.getElementById(id);
+            el.classList.remove('hidden');
+            setTimeout(() => {
+                el.classList.remove('scale-95', 'opacity-0');
+                el.classList.add('scale-100', 'opacity-100');
+            }, 50);
+        }
+
+        function hideAllModals() {
+            ['modal-agni', 'modal-rhythm', 'modal-prana'].forEach(id => {
+                const el = document.getElementById(id);
+                el.classList.remove('scale-100', 'opacity-100');
+                el.classList.add('scale-95', 'opacity-0');
+                setTimeout(() => el.classList.add('hidden'), 500);
+            });
+            clearInterval(pranaInterval);
+        }
+
+        function closeModals() {
+            hideAllModals();
+            modalBg.classList.remove('opacity-100');
+            modalBg.classList.add('opacity-0');
+            setTimeout(() => {
+                modalContainer.classList.add('hidden');
+            }, 500);
+        }
+
+        window.openAgni = function () {
+            showModalContainer();
+            revealModal('modal-agni');
+            const hour = new Date().getHours();
+            const textEl = document.getElementById('agni-recommendation');
+            if (hour < 10) textEl.innerText = "Warm water with lemon & ginger.";
+            else if (hour < 15) textEl.innerText = "CCF Tea (Cumin, Coriander, Fennel).";
+            else if (hour < 20) textEl.innerText = "A pinch of ginger with rock salt.";
+            else textEl.innerText = "Triphala to cleanse & rest the gut.";
+        };
+
+        window.openRhythm = function () {
+            showModalContainer();
+            revealModal('modal-rhythm');
+        };
+
+        window.openPrana = function () {
+            showModalContainer();
+            revealModal('modal-prana');
+
+            const outer = document.getElementById('prana-circle');
+            const inner = document.getElementById('prana-inner');
+            const txt = document.getElementById('prana-text');
+
+            let phase = 0; // 0: inhale, 1: exhale
+
+            // Initial state
+            txt.innerText = "Inhale";
+            outer.style.transform = "scale(2)";
+            inner.style.transform = "scale(1.5)";
+
+            pranaInterval = setInterval(() => {
+                phase = 1 - phase;
+                if (phase === 1) {
+                    txt.innerText = "Exhale";
+                    outer.style.transform = "scale(1)";
+                    inner.style.transform = "scale(1)";
+                } else {
+                    txt.innerText = "Inhale";
+                    outer.style.transform = "scale(2)";
+                    inner.style.transform = "scale(1.5)";
+                }
+            }, 4000);
+        };
+
+        // Custom animation for spin slow
+        const styleSheet = document.createElement("style");
+        styleSheet.innerText = `
+            @keyframes spin-slow { 100% { transform: rotate(360deg); } }
+            .animate-spin-slow { animation: spin-slow 8s linear infinite; }
+        `;
+        document.head.appendChild(styleSheet);
+
+        // --- 1. Preloader & Init ---
+        const preloader = document.getElementById('preloader');
+        const progressFill = document.getElementById('progress-fill');
+        const loaderText = preloader.querySelector('.loader-text');
+
+        let loadProgress = 0;
+        const loadInterval = setInterval(() => {
+            loadProgress += Math.floor(Math.random() * 10) + 2;
+            if (loadProgress >= 100) {
+                loadProgress = 100;
+                clearInterval(loadInterval);
+                finishLoading();
+            }
+            progressFill.style.width = loadProgress + '%';
+        }, 120);
+
+        function finishLoading() {
+            gsap.to(preloader, {
+                opacity: 0,
+                duration: 1.5,
+                ease: "power2.inOut",
+                delay: 0.5,
+onComplete: () => {
+    preloader.style.display = 'none';
+    initInteractions();
+    initAnimations();
+    if (window.renderQuizQuestion) window.renderQuizQuestion();
+}
+            });
+        }
+
+
+        // --- 2. Custom Magnetic Cursor ---
+        const cursorDot = document.getElementById('cursor-dot');
+        const cursorRing = document.getElementById('cursor-ring');
+        let mouseX = window.innerWidth / 2;
+        let mouseY = window.innerHeight / 2;
+        let ringX = mouseX;
+        let ringY = mouseY;
+
+        const ease = 0.12; // Smoother for Ayurveda feel
+
+        window.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            cursorDot.style.transform = `translate(${mouseX}px, ${mouseY}px)`;
+        });
+
+        function animateCursor() {
+            ringX += (mouseX - ringX) * ease;
+            ringY += (mouseY - ringY) * ease;
+            cursorRing.style.transform = `translate(${ringX}px, ${ringY}px)`;
+            requestAnimationFrame(animateCursor);
+        }
+        animateCursor();
+
+        const interactiveTargets = document.querySelectorAll('.interactive-target');
+        const magneticWraps = document.querySelectorAll('.magnetic-wrap');
+
+        interactiveTargets.forEach(target => {
+            target.addEventListener('mouseenter', () => cursorRing.classList.add('hovering'));
+            target.addEventListener('mouseleave', () => cursorRing.classList.remove('hovering'));
+        });
+
+        magneticWraps.forEach(wrap => {
+            const btn = wrap.querySelector('.magnetic-btn');
+            wrap.addEventListener('mousemove', (e) => {
+                const rect = wrap.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                gsap.to(btn, { x: x * 0.3, y: y * 0.3, duration: 0.4, ease: "power2.out" });
+            });
+            wrap.addEventListener('mouseleave', () => {
+                gsap.to(btn, { x: 0, y: 0, duration: 0.8, ease: "elastic.out(1, 0.4)" });
+            });
+        });
+
+        // --- 3. Particles.js Configuration (Golden Pollen style) ---
+        particlesJS('particles-js', {
+            "particles": {
+                "number": { "value": 50, "density": { "enable": true, "value_area": 1000 } },
+                "color": { "value": "#d4af37" },
+                "shape": { "type": "circle" },
+                "opacity": { "value": 0.4, "random": true, "anim": { "enable": true, "speed": 1, "opacity_min": 0.1, "sync": false } },
+                "size": { "value": 4, "random": true, "anim": { "enable": true, "speed": 2, "size_min": 0.1, "sync": false } },
+                "line_linked": {
+                    "enable": true,
+                    "distance": 200,
+                    "color": "#10b981",
+                    "opacity": 0.15,
+                    "width": 1
+                },
+                "move": {
+                    "enable": true,
+                    "speed": 0.8, // Slow, peaceful floating
+                    "direction": "none",
+                    "random": true,
+                    "out_mode": "out",
+                    "bounce": false,
+                }
+            },
+            "interactivity": {
+                "detect_on": "window",
+                "events": {
+                    "onhover": { "enable": true, "mode": "bubble" }, // Gentle bubble instead of aggressive grab
+                    "onclick": { "enable": true, "mode": "push" },
+                    "resize": true
+                },
+                "modes": {
+                    "bubble": { "distance": 250, "size": 6, "duration": 2, "opacity": 0.8, "speed": 3 },
+                    "push": { "particles_nb": 3 }
+                }
+            },
+            "retina_detect": true
+        });
+
+        // --- 4. 3D Tilt Cards ---
+        const tiltCards = document.querySelectorAll('.tilt-card');
+
+        tiltCards.forEach(card => {
+            const inner = card.querySelector('.tilt-inner') || card.querySelector('img');
+
+            card.addEventListener('mousemove', (e) => {
+                const rect = card.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+
+                // Gentle tilt for Ayurveda
+                const rotateX = ((y - centerY) / centerY) * -10;
+                const rotateY = ((x - centerX) / centerX) * 10;
+
+                gsap.to(inner, {
+                    rotateX: rotateX,
+                    rotateY: rotateY,
+                    duration: 0.8,
+                    ease: "power2.out"
+                });
+            });
+
+            card.addEventListener('mouseleave', () => {
+                gsap.to(inner, { rotateX: 0, rotateY: 0, duration: 1.5, ease: "elastic.out(1, 0.4)" });
+            });
+        });
+
+        // --- 5. Mouse Parallax on Hero ---
+const parallaxContainer = document.getElementById('parallax-container');
+const parallaxHero = document.getElementById('parallax-hero');
+const heroShadow = document.getElementById('hero-shadow');
+
+window.addEventListener('mousemove', (e) => {
+    if (!parallaxContainer) return;
+    const x = (window.innerWidth / 2 - e.clientX) * 0.03; // Slower parallax
+    const y = (window.innerHeight / 2 - e.clientY) * 0.03;
+
+    gsap.to(parallaxHero, { x: x, y: y, duration: 1.5, ease: "power2.out" });
+    gsap.to(heroShadow, { x: x * 0.5, duration: 1.5, ease: "power2.out" });
+});
+
+
+        // --- 6. Text Scramble Effect ---
+        const scrambleCharacters = 'अआइईउऊऋएऐओऔकखगघचछजझञटठडढणतथदधनपफबभमयरलवशषसह'; // Sankrit/Hindi alphabet for cool ancient effect
+        const scrambleElements = document.querySelectorAll('.scramble-text');
+
+        function scramble(element) {
+            const originalText = element.getAttribute('data-scramble') || element.innerText;
+            if (!element.getAttribute('data-scramble')) element.setAttribute('data-scramble', originalText);
+
+            let iteration = 0;
+            const maxIterations = originalText.length;
+
+            clearInterval(element.scrambleInterval);
+
+            element.scrambleInterval = setInterval(() => {
+                element.innerText = originalText.split('').map((char, index) => {
+                    if (index < iteration) return originalText[index];
+                    if (char === ' ' || char === '\n') return char;
+                    return scrambleCharacters[Math.floor(Math.random() * scrambleCharacters.length)];
+                }).join('');
+
+                if (iteration >= maxIterations) clearInterval(element.scrambleInterval);
+                iteration += 1 / 3; // Slower decipher
+            }, 40);
+        }
+
+        interactiveTargets.forEach(target => {
+            const textElement = target.classList.contains('scramble-text') ? target : target.querySelector('.scramble-text');
+            if (textElement) target.addEventListener('mouseenter', () => scramble(textElement));
+        });
+
+
+        // --- Init Function logic ---
+        function initInteractions() {
+            scrambleElements.forEach(el => scramble(el));
+
+    // Init Lenis smooth scroll
+    const lenis = new Lenis({
+        duration: 1.2,
+        lerp: 0.1,
+        smooth: true,
+        orientation: 'vertical',
+        gestureOrientation: 'vertical'
+    });
+
+
+    // Synchronize ScrollTrigger with Lenis
+    lenis.on('scroll', (e) => {
+        ScrollTrigger.update();
+    });
+
+    gsap.ticker.add((time) => {
+        lenis.raf(time * 1000);
+    });
+    gsap.ticker.lagSmoothing(0);
+
+    // Reflow ScrollTrigger after a bit to ensure everything is sorted
+    setTimeout(() => ScrollTrigger.refresh(), 500);
+}
+
+        function initAnimations() {
+            gsap.registerPlugin(ScrollTrigger);
+
+            // GSAP Horizontal Scroll Pinning for Doshas
+            const scrollWrapper = document.getElementById('scroll-wrapper');
+            const panels = gsap.utils.toArray('.horizontal-panel');
+
+gsap.to(panels, {
+    xPercent: -100 * (panels.length - 1),
+    ease: "none",
+    scrollTrigger: {
+        trigger: "#horizontal-models",
+        pin: true,
+        scrub: 1,
+        start: "top top",
+        end: () => "+=" + (scrollWrapper.scrollWidth - window.innerWidth),
+        invalidateOnRefresh: true,
+        anticipatePin: 1,
+    }
+});
+
+            // Normal scroll fades
+            gsap.utils.toArray('.gs-fade').forEach(elem => {
+
+                gsap.from(elem, {
+                    y: 40,
+                    opacity: 0,
+                    duration: 1.2,
+                    ease: "power2.out",
+                    scrollTrigger: {
+                        trigger: elem,
+                        start: "top 90%",
+                        toggleActions: "play none none reverse"
+                    }
+                });
+            });
+
+            ScrollTrigger.refresh();
+        }
+
+        // --- Holistic Rituals Modals ---
+
+        // --- Holistic Rituals Modals ---
+
+        // --- Holistic Rituals Modals ---
+
+        // --- Holistic Rituals Modals ---
+        function openAgni() { showModal("Herbal Alchemy", "Ignite your digestive fire with nature's pharmacy."); }
+        function openRhythm() { showModal("Dinacharya", "Align your daily routines with the rhythm of the sun."); }
+        function openPrana() { showModal("Yogic Prana", "Prescribed movements and breathwork for your constitution."); }
+
+        function showModal(title, text) {
+            console.log("Opening Ritual:", title);
+            document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Form interaction
+        if (document.getElementById('submit-btn')) {
+            document.getElementById('submit-btn').addEventListener('click', function (e) {
+                e.preventDefault();
+                const btnSpanOriginal = this.querySelector('span');
+                if (btnSpanOriginal) btnSpanOriginal.style.opacity = '0';
+
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1200);
+            });
+        }
+
+        // --- Prakriti Assessment Logic ---
+        const prakritiQuestions = [
+            { "q": "Body frame", "a": "Thin, underweight", "b": "Medium, muscular", "c": "Broad, well-built" },
+            { "q": "Skin texture", "a": "Dry, rough, cool", "b": "Soft, warm, flushable", "c": "Oily, smooth, thick" },
+            { "q": "Hair type", "a": "Dry, coarse, brittle", "b": "Fine, soft, early grey", "c": "Thick, oily, strong" },
+            { "q": "Facial features", "a": "Irregular, small", "b": "Sharp, chiseled", "c": "Rounded, large" },
+            { "q": "Eyes", "a": "Small, dry, brownish", "b": "Medium, sharp, reddish", "c": "Large, calm, whitish" },
+            { "q": "Nails", "a": "Brittle, rough, thin", "b": "Soft, pinkish, flexible", "c": "Strong, thick, smooth" },
+            { "q": "Voice", "a": "Thin, low, shaky", "b": "Sharp, loud, energetic", "c": "Deep, smooth, slow" },
+            { "q": "Appetite", "a": "Irregular, small", "b": "Strong, fast eating", "c": "Steady, slow eating" },
+            { "q": "Thirst", "a": "Low, variable", "b": "High, frequent", "c": "Moderate, steady" },
+            { "q": "Digestion", "a": "Irregular, gas", "b": "Strong, acidity", "c": "Slow, heavy feeling" },
+            { "q": "Bowel habits", "a": "Dry, hard stools", "b": "Loose, soft stools", "c": "Regular, thick stools" },
+            { "q": "Sleep pattern", "a": "Light, interrupted", "b": "Moderate, consistent", "c": "Deep, long, heavy" },
+            { "q": "Sweating", "a": "Minimal, non-odorous", "b": "Excessive, odorous", "c": "Moderate, slow start" },
+            { "q": "Movement style", "a": "Fast, energetic", "b": "Purposeful, sharp", "c": "Slow, graceful" },
+            { "q": "Sexual drive", "a": "Fluctuating", "b": "Strong, passionate", "c": "Steady, enduring" },
+            { "q": "Memory", "a": "Quick learn, quick forget", "b": "Moderate learn, sharp", "c": "Slow learn, never forget" },
+            { "q": "Thinking", "a": "Creative, restless", "b": "Logical, focused", "c": "Methodical, calm" },
+            { "q": "Temperament", "a": "Anxious, worried", "b": "Aggressive, irritable", "c": "Calm, affectionate" },
+            { "q": "Speech", "a": "Fast, talkative", "b": "Precise, arguing", "c": "Slow, pleasant" },
+            { "q": "Decision-making", "a": "Indecisive, changing", "b": "Fast, firm", "c": "Thoughtful, slow" },
+            { "q": "Stress response", "a": "Nervous, fear", "b": "Irritable, anger", "c": "Withdrawn, silent" },
+            { "q": "Season reaction", "a": "Dislikes cold, wind", "b": "Dislikes heat, sun", "c": "Dislikes damp, humidity" },
+            { "q": "Habits", "a": "Irregular eating/sleeping", "b": "Organized, focused", "c": "Routine, loyal" },
+            { "q": "Social nature", "a": "Talkative, active", "b": "Dominating, sharp", "c": "Friendly, slow start" },
+            { "q": "Dreams", "a": "Flying, motion, fear", "b": "Fire, light, fighting", "c": "Water, nature, love" }
+        ];
+
+        window.currentQuizIndex = 0;
+        window.quizAnswers = [];
+        const doshaDetailsRaw = {
+            "Vata": {
+                "GRAINS": {
+                    "recommended": [
+                        "Barnyard millet",
+                        "Foxtail millet",
+                        "Pearl millet",
+                        "Sorghum",
+                        "Finger millet",
+                        "Aged rice",
+                        "Old wheat",
+                        "Sattu"
+                    ],
+                    "avoid": [
+                        "Fresh grains",
+                        "Sticky rice",
+                        "Processed wheat",
+                        "Corn snacks"
+                    ]
+                },
+                "LEGUMES": {
+                    "recommended": [
+                        "Tur dal",
+                        "Moong dal",
+                        "Masoor dal",
+                        "Urad dal (dehusked)",
+                        "Green peas",
+                        "Chana dal"
+                    ],
+                    "avoid": [
+                        "Horse gram",
+                        "Heavy pulses",
+                        "Whole urad",
+                        "Rajma",
+                        "Kala chana"
+                    ]
+                },
+                "VEGETABLES": {
+                    "recommended": [
+                        "Bottle gourd",
+                        "Pumpkin",
+                        "Carrot",
+                        "Drumstick",
+                        "Cooked spinach",
+                        "French beans",
+                        "Beetroot",
+                        "Brinjal",
+                        "Cabbage"
+                    ],
+                    "avoid": [
+                        "Raw salads",
+                        "Raw tomatoes",
+                        "Raw onion",
+                        "Excess potatoes",
+                        "Yam (excess)"
+                    ]
+                },
+                "SPICES": {
+                    "recommended": [
+                        "Hing",
+                        "Bay leaf",
+                        "Coriander",
+                        "Cumin",
+                        "Turmeric",
+                        "Fennel",
+                        "Cinnamon",
+                        "Dry ginger",
+                        "Mint",
+                        "Black salt"
+                    ],
+                    "avoid": [
+                        "Excess chilli",
+                        "Garam masala (excess)",
+                        "Pepper (excess)",
+                        "Raw garlic"
+                    ]
+                },
+                "LEAFY_VEG": {
+                    "recommended": [
+                        "Amaranth",
+                        "Cooked spinach",
+                        "Tender methi"
+                    ],
+                    "avoid": [
+                        "Raw leafy veggies",
+                        "Mustard leaves"
+                    ]
+                },
+                "OILS": {
+                    "recommended": [
+                        "Sesame oil",
+                        "Groundnut oil",
+                        "Ghee",
+                        "Coconut oil"
+                    ],
+                    "avoid": [
+                        "Refined oils",
+                        "Safflower oil"
+                    ]
+                },
+                "FRUITS": {
+                    "recommended": [
+                        "Apple",
+                        "Grapes",
+                        "Pomegranate",
+                        "Sweet lime",
+                        "Pear",
+                        "Papaya",
+                        "Jamun",
+                        "Berries"
+                    ],
+                    "avoid": [
+                        "Unripe fruits",
+                        "Excess mango",
+                        "Pineapple (empty stomach)",
+                        "Cucumber at night"
+                    ]
+                },
+                "NUTS": {
+                    "recommended": [
+                        "Almonds",
+                        "Walnuts",
+                        "Raisins",
+                        "Figs",
+                        "Pistachios",
+                        "Makhana"
+                    ],
+                    "avoid": [
+                        "Excess cashew",
+                        "Groundnuts",
+                        "Dates (hot season)"
+                    ]
+                },
+                "DAIRY": {
+                    "recommended": [
+                        "Warm milk",
+                        "Buttermilk",
+                        "Fresh curd (day)",
+                        "Ghee",
+                        "Mild cheese"
+                    ],
+                    "avoid": [
+                        "Cold milk",
+                        "Flavoured yogurt",
+                        "Excess paneer"
+                    ]
+                },
+                "YOGA": {
+                    "recommended": [
+                        "Anulom Vilom",
+                        "Bhramari",
+                        "Balasana",
+                        "Marjarasana",
+                        "Pawanmuktasana",
+                        "Mild Surya Namaskar",
+                        "Tadasana",
+                        "Vajrasana"
+                    ],
+                    "avoid": [
+                        "Shirshasana",
+                        "Fast pranayama",
+                        "Intense backbends"
+                    ]
+                },
+                "FITNESS": {
+                    "recommended": [
+                        "Brisk walking",
+                        "Cycling",
+                        "Swimming",
+                        "Light strength training",
+                        "Yoga stretches"
+                    ],
+                    "avoid": [
+                        "Heavy gym",
+                        "Long-distance running",
+                        "High-impact workouts"
+                    ]
+                }
+            },
+
+            "Pitta": {
+                "Grains": {
+                    "recommended": ["Basmati rice", "Wheat", "Barley", "Oats"],
+                    "avoid": ["Fermented grain foods"]
+                },
+                "Legumes": {
+                    "recommended": ["Moong dal", "Masoor dal"],
+                    "avoid": ["Excess urad dal"]
+                },
+                "Vegetables": {
+                    "recommended": ["Zucchini", "Bottle gourd", "Broccoli", "Cucumber"],
+                    "avoid": ["Raw onion", "Excess tomato", "Chilli"]
+                },
+                "Spices": {
+                    "recommended": ["Coriander", "Fennel", "Turmeric", "Mint"],
+                    "avoid": ["Red chilli", "Excess mustard seeds"]
+                },
+                "Leafy Veg": {
+                    "recommended": ["Coriander leaves", "Moderate spinach"],
+                    "avoid": ["Mustard greens"]
+                },
+                "Oils": {
+                    "recommended": ["Ghee", "Coconut oil"],
+                    "avoid": ["Excess sesame oil"]
+                },
+                "Fruits": {
+                    "recommended": ["Pomegranate", "Sweet lime", "Pears", "Grapes"],
+                    "avoid": ["Excess sour fruits", "Raw mango"]
+                },
+                "Nuts": {
+                    "recommended": ["Soaked almonds", "Pistachios"],
+                    "avoid": ["Excess cashews"]
+                },
+                "Dairy": {
+                    "recommended": ["Ghee", "Buttermilk", "Mild cheese"],
+                    "avoid": ["Heavy cream", "Ice-cold milk"]
+                },
+                "Yoga": {
+                    "recommended": ["Cooling pranayama", "Moon salutations", "Restorative poses"],
+                    "avoid": ["Hot yoga", "Intense backbends"]
+                },
+                "Fitness": {
+                    "recommended": ["Swimming", "Cycling", "Moderate gym"],
+                    "avoid": ["High-heat workouts", "Sprinting in heat"]
+                }
+            },
+
+            "Kapha": {
+                "Grains": {
+                    "recommended": ["Barley", "Millets", "Rye"],
+                    "avoid": ["Excess wheat", "White rice"]
+                },
+                "Legumes": {
+                    "recommended": ["Horse gram", "Moong dal"],
+                    "avoid": ["Excess chana dal"]
+                },
+                "Vegetables": {
+                    "recommended": ["Bitter gourd", "Pumpkin", "Leafy greens"],
+                    "avoid": ["Potato", "Sweet potato"]
+                },
+                "Spices": {
+                    "recommended": ["Ginger", "Black pepper", "Turmeric"],
+                    "avoid": ["Too little spice"]
+                },
+                "Leafy Veg": {
+                    "recommended": ["Methi", "Spinach"],
+                    "avoid": []
+                },
+                "Oils": {
+                    "recommended": ["Mustard oil", "Minimal ghee"],
+                    "avoid": ["Excess coconut oil"]
+                },
+                "Fruits": {
+                    "recommended": ["Apples", "Pears", "Berries"],
+                    "avoid": ["Banana", "Melons"]
+                },
+                "Nuts": {
+                    "recommended": ["Small amounts of almonds"],
+                    "avoid": ["Heavy nut mixes"]
+                },
+                "Dairy": {
+                    "recommended": ["Buttermilk", "Warm low-fat milk"],
+                    "avoid": ["Cream", "Cheese"]
+                },
+                "Yoga": {
+                    "recommended": ["Dynamic Surya Namaskar", "Vinyasa flow"],
+                    "avoid": ["Only slow passive routines"]
+                },
+                "Fitness": {
+                    "recommended": ["Jogging", "Skipping", "Strength training"],
+                    "avoid": ["Sedentary habits"]
+                }
+            },
+
+            "Vata-Pitta": {
+                "Grains": {
+                    "recommended": ["Aged rice", "Barley", "Basmati rice", "Oats", "Warm-prepared millets", "Wheat"],
+                    "avoid": ["Dry corn snacks", "Fermented grain foods", "Uncooked grains"]
+                },
+                "Legumes": {
+                    "recommended": ["Masoor dal", "Masoor dal (well cooked)", "Moong dal"],
+                    "avoid": ["Excess urad dal", "Horse gram", "Rajma"]
+                },
+                "Vegetables": {
+                    "recommended": ["Beetroot", "Bottle gourd", "Broccoli", "Carrot", "Cucumber", "Pumpkin", "Zucchini"],
+                    "avoid": ["Chilli", "Excess tomato", "Raw onion", "Raw salads"]
+                },
+                "Spices": {
+                    "recommended": ["Coriander", "Cumin", "Fennel", "Mild ginger", "Mint", "Turmeric"],
+                    "avoid": ["Excess chilli", "Excess mustard seeds", "Raw garlic", "Red chilli"]
+                },
+                "Leafy Veg": {
+                    "recommended": ["Cooked methi", "Cooked spinach", "Coriander leaves", "Moderate spinach"],
+                    "avoid": ["Mustard greens", "Raw leafy greens"]
+                },
+                "Oils": {
+                    "recommended": ["Coconut oil", "Ghee", "Sesame oil"],
+                    "avoid": ["Excess sesame oil", "Refined oils"]
+                },
+                "Fruits": {
+                    "recommended": ["Banana", "Grapes", "Papaya", "Pears", "Pomegranate", "Ripe mango", "Sweet lime"],
+                    "avoid": ["Cucumber at night", "Excess sour fruits", "Raw mango", "Unripe fruits"]
+                },
+                "Nuts": {
+                    "recommended": ["Pistachios", "Soaked almonds", "Walnuts"],
+                    "avoid": ["Excess cashew", "Groundnuts"]
+                },
+                "Dairy": {
+                    "recommended": ["Buttermilk", "Diluted buttermilk", "Ghee", "Mild cheese", "Warm milk"],
+                    "avoid": ["Cold milk", "Flavoured yogurt", "Heavy cream", "Ice-cold milk"]
+                },
+                "Yoga": {
+                    "recommended": ["Balasana", "Cooling pranayama", "Moon salutations", "Restorative poses", "Slow Surya Namaskar", "Vajrasana"],
+                    "avoid": ["Fast pranayama", "Headstands", "Hot yoga", "Intense backbends"]
+                },
+                "Fitness": {
+                    "recommended": ["Cycling", "Light strength training", "Moderate gym", "Swimming", "Walking"],
+                    "avoid": ["High-heat workouts", "High-impact workouts", "Long-distance running", "Sprinting in heat"]
+                }
+            },
+
+            "Pitta-Kapha": {
+                "Grains": {
+                    "recommended": ["Barley", "Basmati rice", "Millets", "Oats", "Rye", "Wheat"],
+                    "avoid": ["Excess wheat", "Fermented grain foods", "White rice"]
+                },
+                "Legumes": {
+                    "recommended": ["Horse gram", "Masoor dal", "Moong dal"],
+                    "avoid": ["Excess chana dal", "Excess urad dal"]
+                },
+                "Vegetables": {
+                    "recommended": ["Bitter gourd", "Bottle gourd", "Broccoli", "Cucumber", "Leafy greens", "Pumpkin", "Zucchini"],
+                    "avoid": ["Chilli", "Excess tomato", "Potato", "Raw onion", "Sweet potato"]
+                },
+                "Spices": {
+                    "recommended": ["Black pepper", "Coriander", "Fennel", "Ginger", "Mint", "Turmeric"],
+                    "avoid": ["Excess mustard seeds", "Red chilli", "Too little spice"]
+                },
+                "Leafy Veg": {
+                    "recommended": ["Coriander leaves", "Methi", "Moderate spinach", "Spinach"],
+                    "avoid": ["Mustard greens"]
+                },
+                "Oils": {
+                    "recommended": ["Coconut oil", "Ghee", "Minimal ghee", "Mustard oil"],
+                    "avoid": ["Excess coconut oil", "Excess sesame oil"]
+                },
+                "Fruits": {
+                    "recommended": ["Apples", "Berries", "Grapes", "Pears", "Pomegranate", "Sweet lime"],
+                    "avoid": ["Banana", "Excess sour fruits", "Melons", "Raw mango"]
+                },
+                "Nuts": {
+                    "recommended": ["Pistachios", "Small amounts of almonds", "Soaked almonds"],
+                    "avoid": ["Excess cashews", "Heavy nut mixes"]
+                },
+                "Dairy": {
+                    "recommended": ["Buttermilk", "Ghee", "Mild cheese", "Warm low-fat milk"],
+                    "avoid": ["Cheese", "Cream", "Heavy cream", "Ice-cold milk"]
+                },
+                "Yoga": {
+                    "recommended": ["Cooling pranayama", "Dynamic Surya Namaskar", "Moon salutations", "Restorative poses", "Vinyasa flow"],
+                    "avoid": ["Hot yoga", "Intense backbends", "Only slow passive routines"]
+                },
+                "Fitness": {
+                    "recommended": ["Cycling", "Jogging", "Moderate gym", "Skipping", "Strength training", "Swimming"],
+                    "avoid": ["High-heat workouts", "Sedentary habits", "Sprinting in heat"]
+                }
+            },
+
+            "Kapha-Vata": {
+                "Grains": {
+                    "recommended": ["Aged rice", "Barley", "Millets", "Oats", "Rye", "Warm-prepared millets", "Wheat"],
+                    "avoid": ["Dry corn snacks", "Excess wheat", "Uncooked grains", "White rice"]
+                },
+                "Legumes": {
+                    "recommended": ["Horse gram", "Masoor dal (well cooked)", "Moong dal"],
+
+                    
+                    "avoid": ["Excess chana dal", "Horse gram", "Rajma"]
+                },
+                "Vegetables": {
+                    "recommended": ["Beetroot", "Bitter gourd", "Bottle gourd", "Carrot", "Leafy greens", "Pumpkin"],
+                    "avoid": ["Potato", "Raw onion", "Raw salads", "Sweet potato"]
+                },
+                "Spices": {
+                    "recommended": ["Black pepper", "Coriander", "Cumin", "Ginger", "Mild ginger", "Turmeric"],
+                    "avoid": ["Excess chilli", "Raw garlic", "Too little spice"]
+                },
+                "Leafy Veg": {
+                    "recommended": ["Cooked methi", "Cooked spinach", "Methi", "Spinach"],
+                    "avoid": ["Raw leafy greens"]
+                },
+                "Oils": {
+                    "recommended": ["Ghee", "Minimal ghee", "Mustard oil", "Sesame oil"],
+                    "avoid": ["Excess coconut oil", "Refined oils"]
+                },
+                "Fruits": {
+                    "recommended": ["Apples", "Banana", "Berries", "Papaya", "Pears", "Ripe mango"],
+                    "avoid": ["Banana", "Cucumber at night", "Melons", "Unripe fruits"]
+                },
+                "Nuts": {
+                    "recommended": ["Small amounts of almonds", "Soaked almonds", "Walnuts"],
+                    "avoid": ["Excess cashew", "Groundnuts", "Heavy nut mixes"]
+                },
+                "Dairy": {
+                    "recommended": ["Buttermilk", "Diluted buttermilk", "Warm low-fat milk", "Warm milk"],
+                    "avoid": ["Cheese", "Cold milk", "Cream", "Flavoured yogurt"]
+                },
+                "Yoga": {
+                    "recommended": ["Balasana", "Dynamic Surya Namaskar", "Slow Surya Namaskar", "Vajrasana", "Vinyasa flow"],
+                    "avoid": ["Fast pranayama", "Headstands", "Only slow passive routines"]
+                },
+                "Fitness": {
+                    "recommended": ["Jogging", "Light strength training", "Skipping", "Strength training", "Swimming", "Walking"],
+                    "avoid": ["High-impact workouts", "Long-distance running", "Sedentary habits"]
+                }
+            },
+
+            "Tridoshaj": {
+                "Grains": {
+                    "recommended": ["Aged rice", "Barley", "Basmati rice", "Millets", "Oats", "Rye", "Warm-prepared millets", "Wheat"],
+                    "avoid": ["Dry corn snacks", "Excess wheat", "Fermented grain foods", "Uncooked grains", "White rice"]
+                },
+                "Legumes": {
+                    "recommended": ["Horse gram", "Masoor dal", "Masoor dal (well cooked)", "Moong dal"],
+                    "avoid": ["Excess chana dal", "Excess urad dal", "Horse gram", "Rajma"]
+                },
+                "Vegetables": {
+                    "recommended": ["Beetroot", "Bitter gourd", "Bottle gourd", "Broccoli", "Carrot", "Cucumber", "Leafy greens", "Pumpkin", "Zucchini"],
+                    "avoid": ["Chilli", "Excess tomato", "Potato", "Raw onion", "Raw salads", "Sweet potato"]
+                },
+                "Spices": {
+                    "recommended": ["Black pepper", "Coriander", "Cumin", "Fennel", "Ginger", "Mild ginger", "Mint", "Turmeric"],
+                    "avoid": ["Excess chilli", "Excess mustard seeds", "Raw garlic", "Red chilli", "Too little spice"]
+                },
+                "Leafy Veg": {
+                    "recommended": ["Cooked methi", "Cooked spinach", "Coriander leaves", "Methi", "Moderate spinach", "Spinach"],
+                    "avoid": ["Mustard greens", "Raw leafy greens"]
+                },
+                "Oils": {
+                    "recommended": ["Coconut oil", "Ghee", "Minimal ghee", "Mustard oil", "Sesame oil"],
+                    "avoid": ["Excess coconut oil", "Excess sesame oil", "Refined oils"]
+                },
+                "Fruits": {
+                    "recommended": ["Apples", "Banana", "Berries", "Grapes", "Papaya", "Pears", "Pomegranate", "Ripe mango", "Sweet lime"],
+                    "avoid": ["Banana", "Cucumber at night", "Excess sour fruits", "Melons", "Raw mango", "Unripe fruits"]
+                },
+                "Nuts": {
+                    "recommended": ["Pistachios", "Small amounts of almonds", "Soaked almonds", "Walnuts"],
+                    "avoid": ["Excess cashew", "Excess cashews", "Groundnuts", "Heavy nut mixes"]
+                },
+                "Dairy": {
+                    "recommended": ["Buttermilk", "Diluted buttermilk", "Ghee", "Mild cheese", "Warm low-fat milk", "Warm milk"],
+                    "avoid": ["Cheese", "Cold milk", "Cream", "Flavoured yogurt", "Heavy cream", "Ice-cold milk"]
+                },
+                "Yoga": {
+                    "recommended": ["Balasana", "Cooling pranayama", "Dynamic Surya Namaskar", "Moon salutations", "Restorative poses", "Slow Surya Namaskar", "Vajrasana", "Vinyasa flow"],
+                    "avoid": ["Fast pranayama", "Headstands", "Hot yoga", "Intense backbends", "Only slow passive routines"]
+                },
+                "Fitness": {
+                    "recommended": ["Cycling", "Jogging", "Light strength training", "Moderate gym", "Skipping", "Strength training", "Swimming", "Walking"],
+                    "avoid": ["High-heat workouts", "High-impact workouts", "Long-distance running", "Sedentary habits", "Sprinting in heat"]
+                }
+            }
+        }
+
+            ;
+        window.renderQuizQuestion = function () {
+            const q = prakritiQuestions[window.currentQuizIndex];
+            const content = document.getElementById('quiz-content');
+            if (!content) return;
+
+            gsap.to(content, {
+                opacity: 0, x: -20, duration: 0.3, onComplete: () => {
+                    document.getElementById('quiz-step').innerText = `PILLAR ${window.currentQuizIndex + 1} OF 25`;
+                    document.getElementById('quiz-question').innerText = q.q;
+                    document.getElementById('opt-a').innerText = q.a + " (Vata)";
+                    document.getElementById('opt-b').innerText = q.b + " (Pitta)";
+                    document.getElementById('opt-c').innerText = q.c + " (Kapha)";
+                    document.getElementById('quiz-progress').style.width = ((window.currentQuizIndex + 1) / 25 * 100) + '%';
+                    gsap.fromTo(content, { opacity: 0, x: 20 }, { opacity: 1, x: 0, duration: 0.5 });
+                }
+            });
+        };
+
+        window.handleAnswer = function (choice) {
+            window.quizAnswers[window.currentQuizIndex] = choice;
+            if (window.currentQuizIndex < 24) {
+                window.currentQuizIndex++;
+                window.renderQuizQuestion();
+            } else {
+                window.showQuizResult();
+            }
+        };
+
+        window.prevQuestion = function () {
+            if (window.currentQuizIndex > 0) {
+                window.currentQuizIndex--;
+                window.renderQuizQuestion();
+            }
+        };
+
+        window.showQuizResult = function () {
+            const counts = { a: 0, b: 0, c: 0 };
+            window.quizAnswers.forEach(a => counts[a]++);
+
+            let result = "Vata";
+            const sorted = Object.entries(counts).sort((x, y) => y[1] - x[1]);
+            const primary = sorted[0][0];
+            const secondary = sorted[1][0];
+            const doshaMap = { 'a': 'Vata', 'b': 'Pitta', 'c': 'Kapha' };
+
+            if (counts[primary] - counts[secondary] <= 3) {
+                result = doshaMap[primary] + "-" + doshaMap[secondary];
+            } else {
+                result = doshaMap[primary];
+            }
+
+            document.getElementById('quiz-content').classList.add('hidden');
+            document.getElementById('quiz-nav').classList.add('hidden');
+            document.getElementById('quiz-result').classList.remove('hidden');
+
+            const resultTitle = document.getElementById('result-title');
+            const resultDesc = document.getElementById('result-desc');
+            resultTitle.innerText = result + " Dominant";
+
+            const details = doshaDetailsRaw[result] || doshaDetailsRaw[doshaMap[primary]];
+            let detailsHtml = '<div class="mt-8 overflow-x-auto"><table class="w-full text-left text-xs font-sans text-gray-400 border-collapse border border-white/10">';
+            detailsHtml += '<thead class="bg-white/5 text-primary tracking-widest uppercase"><tr><th class="p-4 border border-white/10">Category</th><th class="p-4 border border-white/10">Recommended</th><th class="p-4 border border-white/10">Avoid</th></tr></thead><tbody>';
+
+            let count = 0;
+            for (const [cat, data] of Object.entries(details)) {
+                if (count >= 7) break;
+                detailsHtml += '<tr>';
+                detailsHtml += '<td class="p-4 border border-white/10 font-bold text-white">' + cat + '</td>';
+                detailsHtml += '<td class="p-4 border border-white/10"><ul>' + data.recommended.slice(0, 2).map(r => '<li>• ' + r + '</li>').join('') + '</ul></td>';
+                detailsHtml += '<td class="p-4 border border-white/10"><ul>' + data.avoid.slice(0, 2).map(a => '<li>• ' + a + '</li>').join('') + '</ul></td>';
+                detailsHtml += '</tr>';
+                count++;
+            }
+            detailsHtml += '</tbody></table></div>';
+
+            resultDesc.innerHTML = 'Your unique profile aligns with the ' + result + ' constitution. Personalized guidance synced.<br>' + detailsHtml;
+            gsap.from("#quiz-result", { opacity: 0, y: 20, duration: 1, ease: "power2.out" });
+            document.getElementById('assessment').scrollIntoView({ behavior: 'smooth' });
+        };
+
+        window.addEventListener('load', () => {
+            ScrollTrigger.refresh();
+            setTimeout(() => ScrollTrigger.refresh(), 2000);
+        });
+
+
+            // Function to fetch and update the latest vitals from CSV
+            async function updateVitals() {
+    try {
+        // Try JSON endpoint first (preferred)
+        let response = await fetch('/api/latest?t=' + Date.now());
+        
+        if (response.ok) {
+            const data = await response.json();
+            
+            const vata = Number(data.ir1) || 0;
+            const pitta = Number(data.ir2) || 0;
+            const kapha = Number(data.ir3) || 0;
+            const temp = Number(data.temperature) || 0;
+            const pred = data.dosha || "Healthy";
+
+            const maxVata = 30000;
+            const maxPitta = 30000;
+            const maxKapha = 30000;
+
+            animateValue('vata-value', vata);
+            animateValue('pitta-value', pitta);
+            animateValue('kapha-value', kapha);
+            animateValue('temp-value', temp.toFixed(2));
+            animateValue('predict-value', pred);
+
+            updateBar('vata-bar', vata, maxVata);
+            updateBar('pitta-bar', pitta, maxPitta);
+            updateBar('kapha-bar', kapha, maxKapha);
+
+            console.log(`✓ Updated - Vata: ${vata}, Pitta: ${pitta}, Kapha: ${kapha}, Temp: ${temp}°C, Dosha: ${pred}`);
+            return;
+        }
+
+        // Fallback to CSV parsing
+        response = await fetch(`data.csv?t=${Date.now()}`);
+        
+        if (!response.ok) throw new Error("Failed to fetch CSV");
+
+        const csvData = await response.text();
+        const lines = csvData.trim().split('\n');
+
+        if (lines.length < 2) return;
+
+        const lastLine = lines[lines.length - 1];
+        const values = lastLine.split(',');
+
+        // Safety check (important ⚠️)
+        if (values.length < 8) {
+            console.warn("Invalid CSV format:", values);
+            return;
+        }
+
+        // Parse values safely
+        const vata = Number(values[2]) || 0;
+        const pitta = Number(values[3]) || 0;
+        const kapha = Number(values[4]) || 0;
+        const temp = Number(values[6]) || 0;
+        const pred = values[7] || "Healthy";
+
+        // Max values
+        const maxVata = 30000;
+        const maxPitta = 30000;
+        const maxKapha = 30000;
+
+        // Update UI safely
+        animateValue('vata-value', vata);
+        animateValue('pitta-value', pitta);
+        animateValue('kapha-value', kapha);
+        animateValue('temp-value', temp.toFixed(2));
+        animateValue('predict-value', pred);
+
+        // Update progress bars (safe DOM check)
+        updateBar('vata-bar', vata, maxVata);
+        updateBar('pitta-bar', pitta, maxPitta);
+        updateBar('kapha-bar', kapha, maxKapha);
+
+        console.log(`✓ Updated (CSV) - Vata: ${vata}, Pitta: ${pitta}, Kapha: ${kapha}, Temp: ${temp}°C, Dosha: ${pred}`);
+
+    } catch (error) {
+        console.warn('Data fetch warning:', error.message);
+    }
+}
+
+// Safe progress bar updater
+function updateBar(id, value, max) {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    const percent = Math.min((value / max) * 100, 100);
+    el.style.width = percent + '%';
+}
+
+// Improved animation function
+function animateValue(elementId, newValue) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+
+    const currentValue = parseFloat(element.textContent);
+
+    element.style.transition = 'all 0.3s ease';
+
+    if (currentValue !== newValue) {
+        element.style.color = '#10b981';
+        element.textContent = newValue;
+
+        setTimeout(() => {
+            element.style.color = '#ffffff';
+        }, 300);
+    }
+}
+
+        // Run once
+        updateVitals();
+
+        // Run every 5 seconds
+        setInterval(updateVitals, 5000);
+    </script>
+</body>
+
+</html>
